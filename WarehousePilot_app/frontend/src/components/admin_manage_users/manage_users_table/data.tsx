@@ -5,6 +5,8 @@ import {WarningCircleSvg} from "./warning-circle";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const statusOptions = [
   {name: "Active", uid: "active"},
   {name: "Inactive", uid: "inactive"},
@@ -79,7 +81,7 @@ export const columns = [
 
 export const fetchUserInfo = async (): Promise<Users[]> => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/admin_dashboard/manage_users', {
+    const response = await axios.get(`${API_BASE_URL}/admin_dashboard/manage_users`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     if (response.status !== 200) {
@@ -102,7 +104,7 @@ export const fetchUserInfo = async (): Promise<Users[]> => {
 // Handle delete action
 export const deleteUser = async (user_id: number) => {
   try {
-    const response = await axios.delete(`http://127.0.0.1:8000/admin_dashboard/delete_user/${user_id}/`, {
+    const response = await axios.delete(`${API_BASE_URL}/admin_dashboard/delete_user/${user_id}/`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     toast.success(response.data.message);

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Dashboard from './Dashboard';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function ManagerDashboard() {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
@@ -12,7 +14,7 @@ function ManagerDashboard() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://127.0.0.1:8000/auth/profile/', {
+          const response = await axios.get(`${API_BASE_URL}/auth/profile/`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUserData(response.data);

@@ -7,6 +7,8 @@ import axios from 'axios';
 import Sidebar from '../dashboard_sidebar/Sidebar';
 import Header from '../dashboard_sidebar/Header';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function ChangePassword() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -22,7 +24,7 @@ function ChangePassword() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://127.0.0.1:8000/auth/profile/', {
+          const response = await axios.get(`${API_BASE_URL}/auth/profile/`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUserData(response.data);
@@ -48,7 +50,7 @@ function ChangePassword() {
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/auth/change_password/', {
+        const response = await axios.post(`${API_BASE_URL}/auth/change_password/`, {
           old_password: oldPassword,
           new_password: newPassword,
         }, {

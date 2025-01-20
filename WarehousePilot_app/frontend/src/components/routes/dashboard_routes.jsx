@@ -1,4 +1,4 @@
-import { Dashboard, ManagerDashboard, AdminDashboard, AccountManagement, ChangePassword, Profile, StaffDashboard  } from '../dashboard';
+import { Dashboard, ManagerDashboard, AdminDashboard, AccountManagement, ChangePassword, Profile, StaffDashboard, QADashboard  } from '../dashboard';
 import KpiDashboard from "../dashboard/KpiDashboard"
 import InventoryTable from '../inventory-stock/App'; 
 import ManageUsersPage from '../admin_manage_users/ManageUsersPage';
@@ -35,5 +35,6 @@ export const dashboard_routes = [
   { path: '/assigned_picklist', element: <AssignedPickList /> },
   { path: '/inventory_and_manufacturing_picklist', element: <InventoryAndManufacturingList /> },
   { path: '/inventory_picklist_items/:order_id', element: <InventoryPickListItem /> },
+  { path: '/qa_dashboard', element: <QADashboard/> },
   { path: '/manufacturing_list_item/:order_id', element: <ManufacturingListItem /> }
 ];

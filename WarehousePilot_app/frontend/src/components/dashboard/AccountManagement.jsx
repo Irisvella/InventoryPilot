@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import NavBar from "../navbar/App";
 
 import SideBar from "../dashboard_sidebar1/App";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 function AccountManagement() {
   const [userData, setUserData] = useState(null);
@@ -13,7 +17,7 @@ function AccountManagement() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await axios.get("http://127.0.0.1:8000/auth/profile/", {
+          const response = await axios.get(`${API_BASE_URL}/auth/profile/`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUserData(response.data);
@@ -25,13 +29,13 @@ function AccountManagement() {
     fetchUserData();
   }, []);
 
-  return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
-      {/* Sidebar */}
-      <SideBar userData={userData} />
-
-      {/* Main Content */}
-      <div className="flex-1 p-6">
+    return (
+      <div>
+        {/* Sidebar */}
+        <SideBar />
+        <NavBar/>
+        {/* Main Content */}
+        <div className="flex-1 p-6">
         <div className="ml-4">
           {/* Header Section */}
           <div className="mb-6">

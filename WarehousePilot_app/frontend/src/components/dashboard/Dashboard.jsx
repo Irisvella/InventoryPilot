@@ -3,6 +3,7 @@ import Header from "../dashboard_sidebar/Header";
 // import Sidebar from "../dashboard_sidebar/Sidebar";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../dashboard_sidebar1/App";
+import NavBar from "../navbar/App";
 
 const Dashboard = ({ userData }) => {
   const navigate = useNavigate();
@@ -19,8 +20,9 @@ const Dashboard = ({ userData }) => {
   };
 
   return (
-    <div className="flex h-dvh w-full">
+    <div>
     <SideBar /> {/* Add the SideBar component here */}
+    <NavBar/>
 
       {/* Main Content */}
       <div className="flex-1 sm:ml-10 sm:mt-10">

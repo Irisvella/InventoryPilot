@@ -146,6 +146,9 @@ class GenerateInventoryAndManufacturingListsView(APIView):
                     print("add manuList item")
                     manuListItems.append(ManufacturingListItem(sku_color=Part.objects.get(sku_color=s), manufacturing_list_id=manuList, amount = orderQty))
             ManufacturingListItem.objects.bulk_create(manuListItems)
+        #create empty inventory picklist for the order
+        inventoryPicklist = InventoryPicklist.objects.get_or_create(status = False, order_id=order)
+
         #'''
         try:
             manuList = ManufacturingLists.objects.get(order_id = order)

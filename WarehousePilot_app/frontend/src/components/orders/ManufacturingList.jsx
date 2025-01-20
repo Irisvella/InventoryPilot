@@ -15,6 +15,8 @@ import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const ManufacturingList = () => {
   const [filterValue, setFilterValue] = useState("");
   const [rows, setRows] = useState([]);
@@ -59,7 +61,7 @@ const ManufacturingList = () => {
       }
 
       const response = await axios.get(
-        "http://127.0.0.1:8000/manufacturingLists/manufacturing_list/",
+        `${API_BASE_URL}/manufacturingLists/manufacturing_list/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

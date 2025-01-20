@@ -1,14 +1,9 @@
-// the main page of the admin dashboard. The first thing they see when logging in.
-// route: /admin_dashboard
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Dashboard from './Dashboard';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-function AdminDashboard() {
+function QADashboard() {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
@@ -17,29 +12,26 @@ function AdminDashboard() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get(`${API_BASE_URL}/auth/profile/`, {
+          const response = await axios.get('http://127.0.0.1:8000/auth/profile/', {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUserData(response.data);
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
+      } else {
+        navigate('/login'); // Redirect to login if token is missing
       }
     };
     fetchUserData();
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
-  };
-
+  }, [navigate]);
 
   return (
     <div>
       <Dashboard userData={userData} />
+      <h1>Hello QA Dashboard</h1>
     </div>
   );
 }
 
-export default AdminDashboard;
+export default QADashboard;

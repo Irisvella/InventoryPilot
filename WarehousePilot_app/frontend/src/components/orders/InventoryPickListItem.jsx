@@ -17,6 +17,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import SideBar from "../dashboard_sidebar1/App";
 import axios from "axios";
 
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const InventoryPicklistItem = () => {
   const { order_id } = useParams();
   const [inventoryItems, setInventoryItems] = useState([]);
@@ -53,7 +56,7 @@ const InventoryPicklistItem = () => {
       const [inventoryResponse, manufacturingResponse] = await Promise.all([
         axios
           .get(
-            `http://127.0.0.1:8000/orders/inventory_picklist_items/${order_id}/`,
+            `${API_BASE_URL}/orders/inventory_picklist_items/${order_id}/`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -64,7 +67,7 @@ const InventoryPicklistItem = () => {
           }),
         axios
           .get(
-            `http://127.0.0.1:8000/manufacturingLists/manufacturing_list_item/${order_id}/`,
+            `${API_BASE_URL}/manufacturingLists/manufacturing_list_item/${order_id}/`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -148,7 +151,7 @@ const InventoryPicklistItem = () => {
         return;
       }
       await axios.patch(
-        `http://127.0.0.1:8000/inventory/inventory_picklist_items/${selectedItem.picklist_item_id}/pick/`,
+        `${API_BASE_URL}/inventory/inventory_picklist_items/${selectedItem.picklist_item_id}/pick/`,
         {},
         {
           headers: {

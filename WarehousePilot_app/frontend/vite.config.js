@@ -9,4 +9,5 @@ export default defineConfig({
       config: './tailwind.config.cjs', // Explicitly specify the Tailwind config file
     }),
   ],
+  base: "/",
 });

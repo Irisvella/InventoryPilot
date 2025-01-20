@@ -4,6 +4,8 @@ import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { useNavigate, useParams } from "react-router-dom";
 import Modal from "./Modal";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function UserForm() {
   const [username, setUsername] = useState("");
   const [first_name, setFirstName] = useState("");
@@ -47,7 +49,7 @@ export default function UserForm() {
       if (user_id) {
         try {
           const response = await axios.get(
-            `http://127.0.0.1:8000/admin_dashboard/edit_user/${user_id}/`,
+            `${API_BASE_URL}/admin_dashboard/edit_user/${user_id}/`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -108,8 +110,8 @@ export default function UserForm() {
       }
 
       const url = isEditMode
-        ? `http://127.0.0.1:8000/admin_dashboard/edit_user/${user_id}/`
-        : "http://127.0.0.1:8000/admin_dashboard/add_user/";
+        ? `${API_BASE_URL}/admin_dashboard/edit_user/${user_id}/`
+        : `${API_BASE_URL}/admin_dashboard/add_user/`;
 
       const method = isEditMode ? "put" : "post";
 

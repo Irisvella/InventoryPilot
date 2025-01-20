@@ -19,6 +19,8 @@ import axios from "axios";
 import {Spinner} from "@heroui/spinner";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const InventoryPickList = () => {
   const [filterValue, setFilterValue] = useState("");
   const [rows, setRows] = useState([]);
@@ -71,7 +73,7 @@ const InventoryPickList = () => {
       }
 
       const response = await axios.get(
-        "http://127.0.0.1:8000/orders/inventory_picklist/",
+        `${API_BASE_URL}/orders/inventory_picklist/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -119,7 +121,7 @@ const InventoryPickList = () => {
         return;
       }
       const staffResp = await axios.get(
-        "http://127.0.0.1:8000/auth/retrieve_users",
+        `${API_BASE_URL}/auth/retrieve_users`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -160,7 +162,7 @@ const InventoryPickList = () => {
         return;
       }
       await axios.post(
-        `http://127.0.0.1:8000/inventory/assign_order/${assigningOrderId}`,
+        `${API_BASE_URL}/inventory/assign_order/${assigningOrderId}`,
         { user_id: selectedStaffId },
         {
           headers: {
@@ -316,7 +318,7 @@ const InventoryPickList = () => {
                   const fullName = `${staff.first_name} ${staff.last_name}`;
                   return (
                     <SelectItem
-                      key={staff.user_id} // toString() if needed ? ?
+                      key={staff.user_id} 
                       value={staff.user_id}
                     >
                       {fullName}
