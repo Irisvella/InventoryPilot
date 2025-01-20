@@ -34,6 +34,8 @@ export default function SideBar() {
     localStorage.removeItem('token');
     navigate('/');
   };
+  const token = localStorage.getItem("token");
+  console.log("Token from localStorage:", token); // Debugging
 
   return (
     <div style={{ width: '0px',  height: '0px' }}> 

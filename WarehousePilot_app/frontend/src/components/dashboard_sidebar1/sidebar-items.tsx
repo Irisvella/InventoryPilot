@@ -32,10 +32,10 @@ export const items: SidebarItem[] = [
     title: "Production Plan",
   },
   {
-    key: "shop_floor",
-    href: "#",
+    key: "staff_assigned_tasks",
+    href: "/staff_manufacturing_tasks",
     icon: "solar:bill-list-outline",
-    title: "Shop Floor",
+    title: "Assigned tasks",
   },
   {
     key: "inventory",
