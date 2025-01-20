@@ -3,8 +3,6 @@ import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } 
 import type { Inventory, StatusOptions } from "./data";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 type AddItemFormProps = {
   onAddItem: (newItem: Inventory) => void;
   onCancel: () => void;
@@ -29,7 +27,7 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({ onAddItem, onCancel })
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/inventory/add`, {
+      const response = await fetch("http://127.0.0.1:8000/inventory/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

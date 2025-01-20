@@ -1,12 +1,13 @@
 import logging
 from django.http import JsonResponse
+from .models import Inventory
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import json
 from rest_framework import status
 from django.middleware.csrf import get_token
-from .models import InventoryPicklist, InventoryPicklistItem, Inventory
+from .models import InventoryPicklist, InventoryPicklistItem
 from .serializers import OrderSerializer
 from auth_app.models import users
 

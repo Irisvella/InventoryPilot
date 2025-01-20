@@ -494,8 +494,7 @@ export default function InventoryTable() {
   }
 
   return (
-    <div style={{ marginTop: "-80px" }}>
-      <NavBar />
+    <div>
       <SideBar /> {/* Add the SideBar component here */}
       <div className="flex-1 p-6" style={{ padding: "40px" }}>
         {topBar}

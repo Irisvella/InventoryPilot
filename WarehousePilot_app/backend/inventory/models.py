@@ -21,10 +21,6 @@ class InventoryPicklist(models.Model):
     order_id = models.ForeignKey(Orders, on_delete=models.CASCADE)
     assigned_employee_id = models.ForeignKey(users, null=True, on_delete=models.SET_NULL)
     status = models.BooleanField()
-    class Meta:
-        constraints = [
-        models.UniqueConstraint(fields=['order_id'], name='unique_order_picklist')
-        ]
 
 class InventoryPicklistItem(models.Model):
       picklist_item_id = models.AutoField(primary_key=True)

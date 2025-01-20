@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 
 coverage/
-
-.env.development
-.env.production

@@ -21,8 +21,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; 
-
 // Extend dayjs with UTC and timezone
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -97,7 +95,7 @@ const OrderListView = () => {
       }
 
       const response = await axios.get(
-        `${API_BASE_URL}/orders/ordersview/`,
+        "http://127.0.0.1:8000/orders/ordersview/",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -165,7 +163,7 @@ const OrderListView = () => {
 
       // Send POST request to start the order
       const response = await axios.post(
-        `${API_BASE_URL}/orders/start_order/${orderId}/`,
+        `http://127.0.0.1:8000/orders/start_order/${orderId}/`,
         {},
         {
           headers: {
@@ -194,7 +192,7 @@ const OrderListView = () => {
 
         // Second POST request to generate the list (after starting the order)
         const generateListsResponse = await axios.post(
-          `${API_BASE_URL}/orders/generateLists/`,
+          "http://127.0.0.1:8000/orders/generateLists/",
           { orderID: orderId },
           {
             headers: {

@@ -20,8 +20,6 @@ import {
 import {Icon} from "@iconify/react";
 import NotificationItem from "./notification-item";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 type Notification = {
   id: string;
   isRead?: boolean;
@@ -39,7 +37,7 @@ enum NotificationTabs {
 }
 
 const fetchNotifications = async () => {
-  const response = await fetch(`${API_BASE_URL}/inventory`);
+  const response = await fetch('http://127.0.0.1:8000/inventory');
   const data = await response.json();
   return data.low_stock_items.map((item: any) => ({
     id: item.id,

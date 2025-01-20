@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Typography, CircularProgress, Box } from '@mui/material';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const columns = [
   { field: 'sku_color_id', headerName: 'SKU Color ID', width: 150 },
   { field: 'qty', headerName: 'Quantity', width: 150 },
@@ -25,7 +23,7 @@ const StockLevelsPreview = () => {
     }
 
     // Fetch inventory data from the backend
-    fetch(`${API_BASE_URL}/inventory/inventorypreview/`, {
+    fetch('http://127.0.0.1:8000/inventory/inventorypreview/', {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',

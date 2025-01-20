@@ -3,8 +3,6 @@ import {DefaultCircleSvg} from "./default-circle";
 import {SuccessCircleSvg} from "./success-circle";
 import {WarningCircleSvg} from "./warning-circle";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export const statusOptions = [
   {name: "Low", uid: "low"},
   {name: "Moderate", uid: "moderate"},
@@ -61,7 +59,7 @@ export const columns = [
 ];
 
 export const fetchInventoryData = async (): Promise<Inventory[]> => {
-  const response = await fetch(`${API_BASE_URL}/inventory`);
+  const response = await fetch("http://127.0.0.1:8000/inventory");
   if (!response.ok) {
     throw new Error("Failed to fetch inventory data");
   }
@@ -76,7 +74,7 @@ export const fetchInventoryData = async (): Promise<Inventory[]> => {
 };
 
 export const getCsrfToken = async (): Promise<string> => {
-  const response = await fetch(`${API_BASE_URL}/inventory/csrf-token`);
+  const response = await fetch("http://127.0.0.1:8000/inventory/csrf-token");
   if (!response.ok) {
     throw new Error("Failed to fetch CSRF token");
   }
@@ -86,7 +84,7 @@ export const getCsrfToken = async (): Promise<string> => {
 
 export const deleteInventoryItems = async (itemIds: number[]): Promise<void> => {
   const csrfToken = await getCsrfToken();
-  const response = await fetch(`${API_BASE_URL}/inventory/delete`, {
+  const response = await fetch("http://127.0.0.1:8000/inventory/delete", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

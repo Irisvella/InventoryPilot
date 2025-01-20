@@ -1,7 +1,6 @@
 "use client";
 
 import type {NavbarProps} from "@nextui-org/react";
-import { useNavigate, useLocation } from 'react-router-dom';
 
 import React from "react";
 import {
@@ -19,23 +18,17 @@ import {
 // import {csfLogo} from "./csf"; Create a csf.jsx file for the logo and use this import to display it 
 
 const menuItems = [
-  "Home",
-  "Features",
-  "Metrics",
-  "Login As Different User",
- 
+  "About",
+  "Blog",
+  "Customers",
+  "Pricing",
+  "Enterprise",
+  "Changelog",
+  "Documentation",
+  "Contact Us",
 ];
 
 export default function NavBar(props: NavbarProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleLoginAsDifferentUser = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
-  };
-
   return (
     <Navbar
       {...props}
@@ -63,7 +56,7 @@ export default function NavBar(props: NavbarProps) {
 
         {/* Items */}
         <NavbarItem className="hidden md:flex">
-          <Link className="text-default-500" href="/dashboard" size="sm">
+          <Link className="text-default-500" href="#" size="sm">
             Home
           </Link>
         </NavbarItem>
@@ -72,8 +65,8 @@ export default function NavBar(props: NavbarProps) {
             Features
           </Link>
         </NavbarItem>
-        <NavbarItem>
-          <Link className="text-default-500" href="#" size="sm">
+        <NavbarItem isActive>
+          <Link aria-current="page" color="foreground" href="#" size="sm">
             Metrics
           </Link>
         </NavbarItem>
@@ -83,7 +76,7 @@ export default function NavBar(props: NavbarProps) {
           </Link>
         </NavbarItem>
         <NavbarItem className="ml-2 !flex">
-          <Button radius="full" variant="flat" onPress={handleLoginAsDifferentUser}>
+          <Button radius="full" variant="flat">
             Login as different user
           </Button>
         </NavbarItem>
@@ -102,6 +95,13 @@ export default function NavBar(props: NavbarProps) {
           },
         }}
       >
+        {menuItems.map((item, index) => (
+          <NavbarMenuItem key={`${item}-${index}`}>
+            <Link className="w-full text-default-500" href="#" size="md">
+              {item}
+            </Link>
+          </NavbarMenuItem>
+        ))}
       </NavbarMenu>
     </Navbar>
   );

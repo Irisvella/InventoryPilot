@@ -4,7 +4,6 @@ import type {Selection, SortDescriptor} from "@nextui-org/react";
 import type {ColumnsKey, StatusOptions, Users} from "./data";
 import type {Key} from "@react-types/shared";
 import SideBar from "../../dashboard_sidebar1/App";
-import NavBar from "../../navbar/App";
 
 import {
   Dropdown,
@@ -526,8 +525,7 @@ export default function ManageUsersTable() {
   });
 
   return (
-    <div style={{ marginTop: "-80px" }}> 
-      <NavBar />
+    <div> 
       <SideBar />
     <div className="flex-1 p-6" style={{ padding: '40px' }}>
       {topBar}

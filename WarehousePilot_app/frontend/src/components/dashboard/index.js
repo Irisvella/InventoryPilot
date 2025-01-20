@@ -5,7 +5,6 @@ export { default as AccountManagement } from './AccountManagement';
 export { default as ChangePassword } from './ChangePassword';
 export { default as Profile } from './Profile';
 export { default as StaffDashboard } from './StaffDashboard';
-export { default as QADashboard } from './QADashboard'; 
 import KpiDashboard from "./KpiDashboard";
 
 const routes = [

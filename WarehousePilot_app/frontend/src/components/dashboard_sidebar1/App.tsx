@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";import {
+import React from "react";
+import {
   Avatar,
   Button,
   Modal,
@@ -20,7 +21,6 @@ import Sidebar from "./sidebar";
 import { useNavigate } from 'react-router-dom';
 
 
-
 export default function SideBar() {
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const navigate = useNavigate();
@@ -34,14 +34,6 @@ export default function SideBar() {
     localStorage.removeItem('token');
     navigate('/');
   };
-  const [user, setUser] = useState({ name: '', role: '' });
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser({ name: parsedUser.first_name, role: parsedUser.role });
-    }
-  }, []);
 
   return (
     <div style={{ width: '0px',  height: '0px' }}> 
@@ -96,9 +88,9 @@ export default function SideBar() {
                   src=""
                 />
                 <div className="flex flex-col">
-                <p className="text-small font-medium text-default-600">{user.name}</p>
-                <p className="text-tiny text-default-400">{user.role}</p>
-              </div>
+                  <p className="text-small font-medium text-default-600">John Doe</p>
+                  <p className="text-tiny text-default-400">Manager</p>
+                </div>
               </div>
 
               <ScrollShadow className="-mr-6 h-full max-h-full py-6 pr-6">
@@ -142,7 +134,7 @@ export default function SideBar() {
       </Modal>
       <div className="w-full flex-1 flex-col p-4">
         <header className="flex items-center gap-3 rounded-medium p-4">
-          <Button isIconOnly size="sm" variant="light" onPress={onOpen} style={{ zIndex: 50 }}>
+          <Button isIconOnly size="sm" variant="light" onPress={onOpen} style={{ marginRight: '30px' }}>
             <Icon
               className="text-default-500"
               height={24}

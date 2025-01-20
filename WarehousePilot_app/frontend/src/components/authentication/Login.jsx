@@ -7,8 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './authentication.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +26,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login/`, { username, password });
+      const response = await axios.post('http://127.0.0.1:8000/auth/login/', { username, password });
       console.log('Login response:', response.data); // Log the entire response
 
 

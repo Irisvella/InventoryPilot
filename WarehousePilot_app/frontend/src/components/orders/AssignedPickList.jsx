@@ -18,8 +18,6 @@ import axios from "axios";
 import SideBar from "../dashboard_sidebar1/App";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const AssignedPickList = () => {
   const [filterValue, setFilterValue] = useState("");
   const [rows, setRows] = useState([]); 
@@ -59,7 +57,7 @@ const AssignedPickList = () => {
         return;
       }
       const response = await axios.get(
-        `${API_BASE_URL}/inventory/assigned_inventory_picklist/`,
+        "http://127.0.0.1:8000/inventory/assigned_inventory_picklist/",
         {
           headers: {
             Authorization: `Bearer ${token}`,

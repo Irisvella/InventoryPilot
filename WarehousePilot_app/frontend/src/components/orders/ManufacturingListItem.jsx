@@ -16,8 +16,6 @@ import SideBar from "../dashboard_sidebar1/App";
 import { Button } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const ManufacturingListItem = () => {
   const { order_id } = useParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Add sidebar state
@@ -67,7 +65,7 @@ const ManufacturingListItem = () => {
       }
 
       const response = await axios.get(
-        `${API_BASE_URL}/manufacturingLists/manufacturing_list_item/${order_id}/`,
+        `http://127.0.0.1:8000/manufacturingLists/manufacturing_list_item/${order_id}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
