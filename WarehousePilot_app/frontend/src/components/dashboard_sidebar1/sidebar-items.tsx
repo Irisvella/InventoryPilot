@@ -50,6 +50,12 @@ export const items: SidebarItem[] = [
     title: "Account Management",
   },
   {
+    key: "qa_tasks",
+    href: "/qa_tasks",
+    icon: "solar:checklist-outline",
+    title: "QA Tasks",
+  },
+  {
     key: "assigned_picklist",
     href: "/assigned_picklist",
     icon: "solar:clipboard-list-outline",

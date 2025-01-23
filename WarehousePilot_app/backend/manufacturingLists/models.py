@@ -2,6 +2,7 @@ from django.db import models
 from parts.models import Part
 from orders.models import Orders
 from auth_app.models import users
+from django.conf import settings
 # Create your models here.
 
 class ManufacturingLists(models.Model):
@@ -84,5 +85,26 @@ class ManufacturingListItem(models.Model):
     process_progress = models.CharField(null=True, max_length=25, choices=PROGRESS_STAGES)
     manufacturing_task = models.ForeignKey(ManufacturingTask, null=True, on_delete=models.SET_NULL)
 
+class QAErrorReport(models.Model):
+    """
+    Stores detailed QA error reports. Multiple reports can be linked to a single task.
+    """
+    id = models.AutoField(primary_key=True)
+    manufacturing_task = models.ForeignKey(
+        ManufacturingTask,
+        on_delete=models.CASCADE,
+        related_name='error_reports'
+    )
+    subject = models.CharField(max_length=255, null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
+    reported_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"QAErrorReport #{self.id} (Task {self.manufacturing_task.manufacturing_task_id})"
     

@@ -38,3 +38,19 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "100"
     command: npm run dev -- --host
+
+  redis:
+    image: redis
+    container_name: redis_container
+  
+  celery:
+    restart: always
+    build:
+      context: ./WarehousePilot_app/backend
+      dockerfile: Dockerfile.backend
+    command: celery -A backend worker -B -E -l INFO
+    container_name: celery_container
+    depends_on:
+      - db
+      - redis
+      - backend

@@ -1,4 +1,4 @@
-import { Dashboard, ManagerDashboard, AdminDashboard, AccountManagement, ChangePassword, Profile, StaffDashboard  } from '../dashboard';
+import { Dashboard, ManagerDashboard, AdminDashboard, AccountManagement, ChangePassword, Profile, StaffDashboard, QADashboard  } from '../dashboard';
 import KpiDashboard from "../dashboard/KpiDashboard"
 import InventoryTable from '../inventory-stock/App'; 
 import ManageUsersPage from '../admin_manage_users/ManageUsersPage';
@@ -12,6 +12,7 @@ import AssignedPickList from '../orders/AssignedPickList';
 import InventoryPickListItem from '../orders/InventoryPickListItem';
 import InventoryAndManufacturingList from '../orders/InventoryAndManufacturingList';
 import ManufacturingListItem from '../orders/ManufacturingListItem';
+import QATasks from '../orders/QAtasks';
 import StaffManufacturingTasks from '../manufacturing/StaffManufacturingTasks';
 
 
@@ -37,5 +38,7 @@ export const dashboard_routes = [
   { path: '/inventory_and_manufacturing_picklist', element: <InventoryAndManufacturingList /> },
   { path: '/inventory_picklist_items/:order_id', element: <InventoryPickListItem /> },
   { path: '/manufacturing_list_item/:order_id', element: <ManufacturingListItem /> },
+  { path: '/qa_tasks', element: <QATasks /> },
+  { path: '/qa_dashboard', element: <QADashboard/> },
   { path: '/staff_manufacturing_tasks', element: <StaffManufacturingTasks /> }
 ]

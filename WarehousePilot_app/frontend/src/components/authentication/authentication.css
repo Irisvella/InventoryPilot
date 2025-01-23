@@ -128,3 +128,34 @@ html, body {
 .shake {
   animation: shake 0.5s;
 }
+@media (max-width: 1000px) {
+  .hide-below-1000 {
+    display: none;
+  }
+}
+
+/* Make text smaller on screens smaller than 600px */
+@media (max-width: 1200px) {
+  h1 {
+    font-size: 25px !important;  
+  }
+
+  .form-label {
+    font-size: 16px; 
+  margin-bottom: 3px;
+  }
+
+  .form-input {
+    font-size: 16px; 
+    padding: 12px; 
+  }
+
+  .form-options {
+    font-size: 12px;
+  }
+
+  .forgot-password {
+    font-size: 14px; 
+  }
+
+}
