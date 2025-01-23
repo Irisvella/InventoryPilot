@@ -22,7 +22,8 @@ const Dashboard = ({ userData }) => {
   return (
     <div>
     <SideBar /> {/* Add the SideBar component here */}
-    <NavBar/>
+    <NavBar className="hidden md:block"/>
+
 
       {/* Main Content */}
       <div className="flex-1 sm:ml-10 sm:mt-10">
