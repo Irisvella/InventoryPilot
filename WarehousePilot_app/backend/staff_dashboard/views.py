@@ -7,12 +7,16 @@
 
 # Create your views here.
 from django.http import HttpResponse
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from django.db.models import Q
+from django.utils import timezone 
+
 from manufacturingLists.models import ManufacturingTask
 
 def index(request):
@@ -98,3 +102,38 @@ class StaffManufacturingTasksView(APIView):
                 {"error": "An unexpected error occurred."}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class CompleteManufacturingTask(APIView):
+    def post(self, request, task_id):
+        try:
+            # Retrieve the manufacturing task by ID
+            task = get_object_or_404(ManufacturingTask, manufacturing_task_id=task_id)
+
+            # Determine the current stage and update the status accordingly
+            if task.status == "nesting":
+                task.status = "bending"
+                task.nesting_end_time = timezone.now()  # Set the timestamp for nesting
+            elif task.status == "bending":
+                task.status = "cutting"
+                task.bending_end_time = timezone.now()  # Set the timestamp for bending
+            elif task.status == "cutting":
+                task.status = "welding"  # Default to welding
+                task.cutting_end_time = timezone.now()  # Set the timestamp for cutting
+            elif task.status == "welding":
+                task.status = "production_qa"
+                task.welding_end_time = timezone.now()  # Set the timestamp for welding
+                task.prod_qa = True  # Ensure the 'prod_qa' field is updated
+            elif task.status == "production_qa":
+                return JsonResponse({"message": "Task is already at the Production QA stage!"}, status=400)
+
+            # Save the updated task status and the relevant end time
+            task.save()
+
+            return JsonResponse({"message": f"Task status updated to {task.status}"}, status=200)
+
+        except ManufacturingTask.DoesNotExist:
+            return JsonResponse({"error": "Task not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
