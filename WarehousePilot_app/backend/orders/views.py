@@ -1,3 +1,12 @@
+# This file defines views for managing orders, picklists, and manufacturing lists.
+
+# GenerateInventoryAndManufacturingListsView: Generates inventory picklists and manufacturing lists when an order is started.
+# OrdersView: Retrieves all order data including status, due date, and timestamps.
+# StartOrderView: Updates an order's status to 'In Progress' and sets the start timestamp.
+# InventoryPicklistView: Retrieves picklists for orders in progress, indicating if they are filled and their assigned employee.
+# InventoryPicklistItemsView: Fetches detailed items of a picklist for a given order, including location, SKU, quantity, and status.
+
+
 from django.shortcuts import get_object_or_404
 from datetime import datetime
 from django.shortcuts import render
@@ -252,33 +261,6 @@ class InventoryPicklistView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# class InventoryPicklistView(APIView):
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         try:
-#             # Fetch all inventory picklists
-#             inventory_picklists = InventoryPicklist.objects.select_related('order_id', 'assigned_employee_id').all()
-
-#             # Build response data
-#             response_data = [
-#                 {
-                    
-#                     "order_id": picklist.order_id.order_id,  # From related Orders model
-#                     "due_date": picklist.order_id.due_date,  # From related Orders model
-#                     "already_filled": not InventoryPicklistItem.objects.filter(
-#                         picklist_id=picklist.picklist_id, status=False
-#                     ).exists(),  # Determine if all items are marked as filled
-#                     "assigned_to": picklist.assigned_employee_id.username if picklist.assigned_employee_id else "Unassigned",
-#                 }
-#                 for picklist in inventory_picklists
-#             ]
-
-#             return Response(response_data, status=status.HTTP_200_OK)
-
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

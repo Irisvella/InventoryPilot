@@ -1,3 +1,10 @@
+# This file defines authentication and user management endpoints.
+
+# LoginView: Handles user authentication and returns JWT tokens.
+# ChangePasswordView: Allows authenticated users to update their password.
+# ProfileView: Retrieves profile details of the currently authenticated user.
+# RetrieveUsers: Fetches a list of all users from the database.
+
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView

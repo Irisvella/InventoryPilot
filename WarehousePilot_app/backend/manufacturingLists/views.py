@@ -1,3 +1,9 @@
+# This file defines views for managing manufacturing lists and their items.
+
+# ManufacturingListView: Retrieves all manufacturing lists along with their associated orders and statuses.
+# ManufacturingListItemsView: Retrieves all items in a manufacturing list for a given order ID, including details like SKU, quantity, process, and progress.
+
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,7 +21,7 @@ class ManufacturingListView(APIView):
             # Fetch all manufacturing lists with related orders
             manufacturing_lists = ManufacturingLists.objects.select_related('order_id').all()
 
-            # Build response data
+            # response data
             response_data = [
                 {
                     "manufacturing_list_id": m_list.manufacturing_list_id,

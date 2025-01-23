@@ -1,3 +1,14 @@
+# This file defines views for inventory and order management.
+
+# get_inventory: Fetches inventory data and categorizes items by stock levels.
+# delete_inventory_items: Deletes inventory items based on provided item IDs.
+# add_inventory_item: Adds a new item to the inventory.
+# get_csrf_token: Returns a CSRF token for frontend use.
+# InventoryView: Retrieves inventory data via a raw SQL query.
+# AssignOrderView: Assigns an order to a staff member by user_id.
+# AssignedPicklistView: Fetches picklists assigned to the current user that are in progress.
+# PickPicklistItemView: Updates the status of a picklist item to 'picked' by a staff member.
+
 import logging
 from django.http import JsonResponse
 from .models import Inventory

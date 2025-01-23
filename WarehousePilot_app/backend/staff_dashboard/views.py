@@ -1,3 +1,10 @@
+# This file defines views for handling manufacturing tasks.
+
+
+# StaffManufacturingTasksView: Retrieves manufacturing tasks assigned to the logged-in staff member, categorized by process step (e.g., nesting, cutting, welding).
+
+
+
 # Create your views here.
 from django.http import HttpResponse
 from rest_framework.views import APIView

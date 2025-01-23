@@ -1,3 +1,11 @@
+# This file defines user management views for the backend.
+
+# IsAdminUser: Custom permission class allowing access to admin users only.
+# ManageUsersView: Retrieves a list of all users on the platform (admin only).
+# AddUserView: Adds a new user to the database after validating input.
+# EditUserView: Retrieves or updates details of a specific user by user_id.
+# DeleteUserView: Deletes a specific user by user_id.
+
 from django.shortcuts import render, HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -139,3 +147,7 @@ class DeleteUserView(APIView):
         except Exception as e:
             logger.error(f"An error occurred while deleting user: {str(e)}")
             return Response({"error": f"An error occurred: {str(e)}"}, status=500)
+        
+        
+        
+        
