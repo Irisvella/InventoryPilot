@@ -9,6 +9,8 @@ import {
   Input,
   Pagination,
   Button,
+  Modal,
+  Dropdown,
 } from "@nextui-org/react";
 import { SearchIcon } from "@nextui-org/shared-icons";
 import axios from "axios";
@@ -27,6 +29,9 @@ const StaffManufacturingTasks = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const [isCompleteLoading, setIsCompleteLoading] = useState({}); // Track loading per task
+  const [nextStage, setNextStage] = useState("welding"); // Default to welding for cutting stage
+
   const rowsPerPage = 10;
 
   const fetchTasks = async () => {
@@ -55,8 +60,7 @@ const StaffManufacturingTasks = () => {
           qty: row.qty,
           status: row.status,
           sku_color: row.sku_color, // SKU ID
-          end_time: row.end_time || "", // End time
-          
+          end_time: row.end_time || "", // End time, for checking if task is complete
         }))
       );
       setLoading(false);
@@ -70,6 +74,35 @@ const StaffManufacturingTasks = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  const handleCompleteClick = (taskId) => {
+      updateTaskStatus(taskId);
+  };
+
+  const updateTaskStatus = async (taskId) => {
+    try {
+      setIsCompleteLoading((prev) => ({ ...prev, [taskId]: true })); // Set loading for this task
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `http://127.0.0.1:8000/staff_dashboard/complete_task/${taskId}/`,
+        { next_stage: nextStage },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(response.data.message);
+      fetchTasks(); // Refresh tasks after updating
+    } catch (error) {
+      console.error(error);
+      setError("Error updating task status.");
+    } finally {
+      setIsCompleteLoading((prev) => ({ ...prev, [taskId]: false })); // Reset loading for this task
+      setShowPopup(false); // Close popup after action
+    }
+  };
 
   const filteredRows = useMemo(() => {
     if (!filterValue.trim()) return rows;
@@ -126,11 +159,9 @@ const StaffManufacturingTasks = () => {
                   <TableHeader>
                     <TableColumn>Manu_id</TableColumn>
                     <TableColumn>qty</TableColumn>
-                    <TableColumn>status</TableColumn>
+                    <TableColumn>task</TableColumn>
                     <TableColumn>SKU_id</TableColumn>
-                  
                     <TableColumn>end time</TableColumn>
-                    
                     <TableColumn>Action</TableColumn>
                   </TableHeader>
                   <TableBody items={paginatedRows}>
@@ -148,10 +179,21 @@ const StaffManufacturingTasks = () => {
                                 .format("YYYY-MM-DD HH:mm")
                             : "added when we end task"}
                         </TableCell>
-                       
+
                         <TableCell>
-                          <Button size="sm" variant="shadow" color="primary">
-                            complete 
+                          <Button
+                            size="sm"
+                            variant="shadow"
+                            color="primary"
+                            isLoading={isCompleteLoading[item.manufacturing_id]} // Check if loading for this task
+                            isDisabled={item.end_time} // Disable button if end_time is not null
+                            style={{
+                              opacity: item.end_time ? 0.5 : 1, // Grey out if disabled
+                              pointerEvents: item.end_time ? 'none' : 'auto', // Prevent clicks if disabled
+                            }}
+                            onPress={() => handleCompleteClick(item.manufacturing_id, item.status, item.end_time)}
+                          >
+                            complete
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -180,3 +222,6 @@ const StaffManufacturingTasks = () => {
 };
 
 export default StaffManufacturingTasks;
+
+
+
