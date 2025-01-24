@@ -177,7 +177,7 @@ const StaffManufacturingTasks = () => {
                                 .utc(item.end_time)
                                 .tz("America/Toronto")
                                 .format("YYYY-MM-DD HH:mm")
-                            : "added when we end task"}
+                            : "Not completed yet"}
                         </TableCell>
 
                         <TableCell>
