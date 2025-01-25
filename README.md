@@ -79,6 +79,9 @@ To download front-end dependencies: nextUI, reactJS, TailwindCSS, chartJS, heroi
 npm install 
 ```
 ```
+add the .env.development file to connect to the backend 
+```
+```
 npm run dev
 ```
 ```
