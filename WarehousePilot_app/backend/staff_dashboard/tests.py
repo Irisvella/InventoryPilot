@@ -102,9 +102,6 @@ class StaffManufacturingTasksViewTest(APITestCase):
         self.assertEqual(task2["status"], "cutting")
 
 
-   
-    
-
     def test_non_staff_user_cannot_access_tasks(self):
         # Authenticate as non-staff user
         self.client.force_authenticate(user=self.non_staff_user)
