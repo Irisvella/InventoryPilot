@@ -315,7 +315,7 @@ class InventoryPicklistItemsView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         except InventoryPicklist.DoesNotExist:
-            logger.error("Picklist could not be found for order %s (InventoryPicklistItemsView)", picklist.picklist_id)
+            
             return Response(
                 {"error": "No picklist found for the given order"},
                 status=status.HTTP_404_NOT_FOUND

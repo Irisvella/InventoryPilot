@@ -19,7 +19,6 @@ import logging
 # Django logger for backend
 logger = logging.getLogger('WarehousePilot_app')
 
-# Create your views here.
 def home(request):
     return HttpResponse("Hello, World!")
 

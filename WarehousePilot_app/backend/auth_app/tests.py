@@ -1,3 +1,13 @@
+"""
+This file contains test cases for validating authentication
+ It includes the following test classes:
+1. `AuthTests`: Tests login functionality, including successful login and failure scenarios with invalid credentials.
+2. `ChangePasswordTests`: Verifies the password change process, handling scenarios like correct, incorrect, or missing old passwords.
+3. `ProfileViewTests`: Tests profile retrieval, including access for authenticated users, unauthenticated access, and handling invalid tokens.
+
+"""
+
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase

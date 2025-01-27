@@ -18,7 +18,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 class ManufacturingListItemsViewTest(APITestCase):
 
     def setUp(self):
-        # Create a mock user
+        # a mock user
         self.user = get_user_model().objects.create_user(
             username="testuser",
             password="testpassword",
@@ -30,24 +30,24 @@ class ManufacturingListItemsViewTest(APITestCase):
             department="Manufacturing"
         )
 
-        # Generate JWT token for authentication
+        #JWT token for authentication
         refresh = RefreshToken.for_user(self.user)
         self.token = str(refresh.access_token)
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
 
-        # Create a mock order
+        # a mock order
         self.order = Orders.objects.create(order_id=1, status="Pending", due_date="2025-01-30", estimated_duration=5)
 
-        # Create a mock manufacturing list for the order
+        #  a mock manufacturing list for the order
         self.manufacturing_list = ManufacturingLists.objects.create(
             order_id=self.order,
             status="In Progress"
         )
 
-        # Create a mock part
+        # a mock part
         self.part = Part.objects.create(sku_color="Red")
 
-        # Create a mock manufacturing list item
+        # a mock manufacturing list item
         self.manufacturing_list_item = ManufacturingListItem.objects.create(
             manufacturing_list_id=self.manufacturing_list,
             sku_color=self.part,
@@ -57,7 +57,7 @@ class ManufacturingListItemsViewTest(APITestCase):
         )
 
     def test_get_manufacturing_list_items_success(self):
-        # Test successful retrieval of manufacturing list items
+        # Testing successful retrieval of manufacturing list items
         url = reverse('manufacturing_list_item', kwargs={'order_id': self.order.order_id})
         response = self.client.get(url)
         
@@ -69,7 +69,7 @@ class ManufacturingListItemsViewTest(APITestCase):
         print("test_get_manufacturing_list_items_success passed.")
 
     def test_get_manufacturing_list_items_order_not_found(self):
-        # Test when the order does not exist
+        # Testing when the order does not exist
         url = reverse('manufacturing_list_item', kwargs={'order_id': 999})
         response = self.client.get(url)
         
@@ -78,7 +78,7 @@ class ManufacturingListItemsViewTest(APITestCase):
         print("test_get_manufacturing_list_items_order_not_found passed.")
 
     def test_get_manufacturing_list_items_no_manufacturing_list(self):
-        # Test when no manufacturing list exists for the order
+        # Testing when no manufacturing list exists for the order
         order_without_manufacturing_list = Orders.objects.create(order_id=2, status="Pending", due_date="2025-02-01", estimated_duration=3)
         url = reverse('manufacturing_list_item', kwargs={'order_id': order_without_manufacturing_list.order_id})
         response = self.client.get(url)

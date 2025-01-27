@@ -1,5 +1,5 @@
 """
-This file contains test cases for user management functionalities in the application.
+This file contains test cases for user management functionalities 
 The tests cover:
 - Managing users: Admins can retrieve the list of all users while non-admins are restricted.
 - Adding users: Tests for successful user creation, handling duplicate emails, missing fields, and unauthenticated requests.
