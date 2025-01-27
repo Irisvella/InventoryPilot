@@ -31,43 +31,47 @@ from django.shortcuts import get_object_or_404
 from datetime import datetime
 from django.utils import timezone 
 
-import logging
-
-logger = logging.getLogger('WarehousePilot_app')
-
 #generates an inventory picklist and a maufacturing list of an order once the order is "started"
 # Note: print statements have been commented out and can be uncommented for debugging if needed
 class GenerateInventoryAndManufacturingListsView(APIView):
     def post(self, request):
         #retrieve the order id from the http request
         orderID = request.data.get("orderID")
-        logger.debug("GenerateInventoryAndManufacturingListsView\nOrder ID: %s", orderID)
+        print("GenerateInventoryAndManufacturingListsView")
+        print(f"Response OrderID: {orderID}")
         #retrieve the order object from the database using the order id
         order = Orders.objects.get(order_id=orderID)
-        logger.debug("Retrieved order: %s", order.__dict__)
+        print(f'retrieved order: {order.__dict__}')
         
         #get all the parts of the order
         orderParts = OrderPart.objects.filter(order_id=order)
         #'''
-        logger.debug("Order parts: %s", ', '.join([str(x.order_part_id) for x in orderParts]))
+        print("Order Parts:")
+        for op in orderParts:
+            print(op.__dict__)
         #'''
         #get a list of the UNIQUE sku_colors from the parts in the order
         #***
         orderPartSkuColor = list(set(orderParts.values_list('sku_color', flat=True)))
         #'''
-        logger.debug("Unique Order Parts SKU COLORS: %s", ', '.join([str(x) for x in orderPartSkuColor]))
+        print("unique Order Parts SKU COLORS:")
+        for sku in orderPartSkuColor:
+            print(sku)
         #'''
         #get all the objects in inventory that have a quantity greater than 0, amount needed equal to 0 and match the sku_colors of the parts in the order
         inventory = Inventory.objects.filter(sku_color__in=orderPartSkuColor, qty__gt = 0, amount_needed = 0)
         #'''
-        logger.debug("Matching parts in inventory with a quantity greater than 0: %s", ', '.join([str(x) for x in inventory]))
-        logger.debug("Inventory count: %s", inventory.count())
+        print("Matching parts in inventory with a quantity greater than 0:")
+        for i in inventory:
+            print(i.__dict__)
+        
+        print(f"inventory.count(): {inventory.count()}")
         #'''
         if inventory.exists() == True: #if there were matching objects in inventory
-            logger.debug("ENTER 1st IF BLOCK")
+            print("ENTER 1st IF BLOCK")
             #find all the unique skus in the matching inventory objects, since there can be more than one object in inventory with the same sku
             inventorySkus = set(list(inventory.values_list("sku_color", flat=True)))
-            logger.debug(f"inventory matching skus: {inventorySkus}")
+            print(f"inventory matching skus: {inventorySkus}")
             #create an inventory picklist for the order
             inventoryPicklist = InventoryPicklist.objects.create(status = False, order_id=order)
             # create a list of picklist items
@@ -77,22 +81,22 @@ class GenerateInventoryAndManufacturingListsView(APIView):
             for s in inventorySkus: #loop through the unique matching inventory sku set
                 # find the total of the quantity of each unique sku in inventory, aggregating all the inventory objects with the same sku together
                 totalInventoryQty = Inventory.objects.filter(sku_color=Part.objects.get(sku_color=s)).aggregate(total=Sum('qty'))['total']
-                logger.debug(f"total inventory qty: {totalInventoryQty}")
+                print(f"total inventory qty: {totalInventoryQty}")
                 ##orderQty = OrderPart.objects.get(order_id=order, sku_color=s).__getattribute__("qty")
                 orderQty = OrderPart.objects.filter(order_id=order, sku_color=s).aggregate(total=Sum('qty'))['total']
-                logger.debug(f"total order qty: {orderQty}")
+                print(f"total order qty: {orderQty}")
 
                 #if inventory amount exceeds needed amount, only the needed amount will be chosen, and if needed amount exceeds available amount, only the available amount is chosen
                 manuListItemQty = 0
                 if orderQty <= totalInventoryQty:
                     picklistQty = orderQty
-                    logger.debug(f"picklist qty: {picklistQty}")
+                    print(f"picklist qty: {picklistQty}")
                 else: #amount needed exceeds amount available in inventory
                     picklistQty = totalInventoryQty
-                    logger.debug(f"picklist qty: {picklistQty}")
+                    print(f"picklist qty: {picklistQty}")
                     #create a manufacturing list item with the remaining amount needed for the order
                     manuListItemQty = orderQty - picklistQty
-                    logger.debug(f"manuList qty: {manuListItemQty}")
+                    print(f"manuList qty: {manuListItemQty}")
                     manuListItems.append(ManufacturingListItem(manufacturing_list_id=manufacturingList, sku_color=Part.objects.get(sku_color=s), amount=manuListItemQty))
                     for x in Inventory.objects.filter(sku_color=s):
                         x.amount_needed=manuListItemQty
@@ -103,50 +107,52 @@ class GenerateInventoryAndManufacturingListsView(APIView):
             #bulk create all the inventory picklist items in the database
             InventoryPicklistItem.objects.bulk_create(inventoryPicklistItems)
             #'''
-            logger.debug("All Picklist Items: %s", ', '.join([str(x) for x in InventoryPicklistItem.objects.filter(picklist_id=inventoryPicklist)]))
+            print("All Picklist Items:")
+            for i in InventoryPicklistItem.objects.filter(picklist_id=inventoryPicklist): #print all the picklist items
+                print(i.__dict__)
             #'''
             if len(manuListItems) > 0:
-                logger.debug("**Creating manufacturing list 1st if block")
+                print("**Creating manufacturing list 1st if block")
                 manufacturingList.save()
                 ManufacturingListItem.objects.bulk_create(manuListItems)
                 
-        logger.debug(f"orderPartSkuColor): {orderPartSkuColor}")
-        logger.debug(f"orderPartSkuColor len: {len(orderPartSkuColor)}")
+        print(f"orderPartSkuColor): {orderPartSkuColor}")
+        print(f"orderPartSkuColor len: {len(orderPartSkuColor)}")
         invSkuLen = len(set(list(inventory.values_list("sku_color", flat=True))))
-        logger.debug(f"matching inventory sku len): {invSkuLen}")
+        print(f"matching inventory sku len): {invSkuLen}")
         #if not all the parts in the order matched with the parts in inventory, then we have remaining parts that need to be in the manufacturing list
         if inventory.exists() == False or (len((set(orderPartSkuColor)) - set(list(inventory.values_list("sku_color", flat=True)))) > 0):
-            logger.debug("ENTER 2nd IF BLOCK")
+            print("ENTER 2nd IF BLOCK")
             invSkuLen = len(set(list(inventory.values_list("sku_color", flat=True))))
-            logger.debug(f"matching inventory sku len): {invSkuLen}")
-            logger.debug(f"orderPartSkuColor): {len(orderPartSkuColor)}")
+            print(f"matching inventory sku len): {invSkuLen}")
+            print(f"orderPartSkuColor): {len(orderPartSkuColor)}")
             #create the manufacturing list if it is not already created
             if (ManufacturingLists.objects.filter(order_id=order).exists()) == False:
-                logger.debug("**Creating manufacturing list 2nd if block")
+                print("**Creating manufacturing list 2nd if block")
                 manuList = ManufacturingLists.objects.create(status = 'Pending', order_id=order)
             else: #retrieve the manufacturing list if it already exists
                 manuList = ManufacturingLists.objects.get(order_id=order)
             manuListItems= [] #create list of manufacturing list items
             #if there is no inventory picklist for the order, then create all the parts in the order as manufacturing list items
-            logger.debug(f"Is there a picklist?: {InventoryPicklist.objects.filter(order_id=order).exists()}")
+            print(f"Is there a picklist?: {InventoryPicklist.objects.filter(order_id=order).exists()}")
             if (InventoryPicklist.objects.filter(order_id=order).exists()) == False:
-                logger.debug("there is no picklist")
+                print("there is no picklist")
                 for s in orderPartSkuColor:
-                    logger.debug(f"add manuList item {s}")
+                    print(f"add manuList item {s}")
                     ##orderQty = OrderPart.objects.get(order_id=order, sku_color=s).__getattribute__("qty")
                     orderQty = OrderPart.objects.filter(order_id=order, sku_color=s).aggregate(total=Sum('qty'))['total']
                     manuListItems.append(ManufacturingListItem(sku_color=Part.objects.get(sku_color=s), manufacturing_list_id = manuList, amount=orderQty))
             else: #otherwise if there is an inventory picklist for the order, for the remaining order parts that did not get compared to the inventory items earlier (line 42 if block), make the manufacturing list item for them
-                logger.debug("there was a picklist")
+                print("there was a picklist")
                 inventoryPicklist = InventoryPicklist.objects.get(order_id=order)
                 inventoryPicklistSkus = InventoryPicklistItem.objects.filter(picklist_id = inventoryPicklist).values_list('sku_color', flat=True)
                 #***
                 manuSkus = list(set(OrderPart.objects.filter(Q(order_id = order) & ~Q(sku_color__in = inventoryPicklistSkus)).values_list('sku_color', flat=True)))
-                logger.debug(f"manuSkus: {manuSkus}")
+                print(f"manuSkus: {manuSkus}")
                 for s in manuSkus:
                     ##orderQty = OrderPart.objects.get(order_id=order, sku_color=Part.objects.get(sku_color=s)).__getattribute__("qty")
                     orderQty = OrderPart.objects.filter(order_id=order, sku_color=s).aggregate(total=Sum('qty'))['total']
-                    logger.debug("add manuList item")
+                    print("add manuList item")
                     manuListItems.append(ManufacturingListItem(sku_color=Part.objects.get(sku_color=s), manufacturing_list_id=manuList, amount = orderQty))
             ManufacturingListItem.objects.bulk_create(manuListItems)
         #create empty inventory picklist for the order
@@ -157,15 +163,12 @@ class GenerateInventoryAndManufacturingListsView(APIView):
             manuList = ManufacturingLists.objects.get(order_id = order)
         except ManufacturingLists.DoesNotExist:
             manuList = None
-            logger.error("Manufacturing list for order %s does not exist (GenerateInventoryAndManufacturingListsView)", orderID)
-            return Response({'error':'manufacturing list does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        
-        logger.debug(f"manufacturing list object: {manuList}")
+        print(f"manufacturing list object: {manuList}")
         if manuList != None:
-            logger.debug("All Manufacturing List Items: %s", ', '.join([str(x) for x in ManufacturingListItem.objects.filter(manufacturing_list_id = manuList)]))
+            print("All Manufacturing List Items:")
+            for m in ManufacturingListItem.objects.filter(manufacturing_list_id = manuList):
+                print(m.__dict__)
         #'''
-
-        logger.info("Successfully generated the inventory picklist and manufacturing for order %s", orderID)
         return Response({'detail':'inventory picklist and manufacturing list generation successful'}, status=status.HTTP_200_OK)
 
 
@@ -192,10 +195,8 @@ class OrdersView(APIView):
                 "start_timestamp": row[4] if row[4] else None, 
             } for row in result]
 
-            logger.info("Fetched all order data from database")
             return Response(inventory_data)
         except Exception as e:
-            logger.error("Failed to query orders from database (OrdersView)")
             return Response({"error": str(e)}, status=500)
         
         
@@ -217,7 +218,6 @@ class StartOrderView(APIView):
             order.save()
 
             # Return success response with the updated order data
-            logger.info("Successfully started an order")
             return JsonResponse({
                 'status': 'success',  # Overall success of the action
                 'order_id': order.order_id,
@@ -227,7 +227,6 @@ class StartOrderView(APIView):
 
         except Exception as e:
             # In case of any error, return error details
-            logger.error("Failed to start an order (StartOrderView)")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
         
 
@@ -260,11 +259,9 @@ class InventoryPicklistView(APIView):
                 for order in started_orders
             ]
 
-            logger.info("Successfully fetched all started orders, their associated picklists, and their states")
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error("Failed to fetched all started orders (InventoryPicklistView)")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -305,24 +302,23 @@ class InventoryPicklistItemsView(APIView):
                 for item in picklist_items
             ]
 
-            logger.info("Successfully retrieved all items from picklist %s and their states", picklist.picklist_id)
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Orders.DoesNotExist:
-            logger.error("Order could not be found (InventoryPicklistItemsView)")
             return Response(
                 {"error": "Order not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except InventoryPicklist.DoesNotExist:
-            logger.error("Picklist could not be found for order %s (InventoryPicklistItemsView)", picklist.picklist_id)
             return Response(
                 {"error": "No picklist found for the given order"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            logger.error("Failed to retrieve picklist items associated with order %s", order_id)
+            print(f"Error occurred: {str(e)}")
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+

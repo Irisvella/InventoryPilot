@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
-import sys
 
 load_dotenv()
 
@@ -195,51 +194,45 @@ if not os.path.exists(log_path):
 # used to get the path to logs                               
 STATIC_ROOT = os.path.join(log_path, "django.log")
 
-if 'test' in sys.argv:
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': True,  # Disable all existing loggers
-    }
-else:
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '{levelname} {asctime} {module} {message}',
-                'style': '{',
-            },
-            'simple': {
-                'format': '{levelname} {message}',
-                'style': '{',
-            },
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
         },
-        'handlers': {
-            'console': {
-                'level': 'INFO', # records all logger messages of level INFO (low) and above
-                'class': 'logging.StreamHandler',
-                'formatter': 'simple',
-            },
-            'file': {
-                'level': 'INFO',
-                'class': 'logging.FileHandler',
-                'filename': STATIC_ROOT,
-                'formatter': 'verbose',
-            },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
         },
-        'loggers': {
-            'django': {
-                'handlers': ['console', 'file'],
-                'level': 'DEBUG',
-                'propagate': False,
-            },
-            'WarehousePilot_app': { # Logger for our application
-                'handlers': ['console', 'file'],
-                'level': 'INFO',
-                'propagate': False,
-            },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO', # records all logger messages of level INFO (low) and above
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
-    }
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': STATIC_ROOT,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'WarehousePilot_app': { # Logger for our application
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 # CELERY SETTINGS
 

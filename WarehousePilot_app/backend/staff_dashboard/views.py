@@ -1,6 +1,9 @@
 # This file defines views for handling manufacturing tasks.
 
+
 # StaffManufacturingTasksView: Retrieves manufacturing tasks assigned to the logged-in staff member, categorized by process step (e.g., nesting, cutting, welding).
+
+
 
 # Create your views here.
 from django.http import HttpResponse
@@ -13,11 +16,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from django.db.models import Q
 from django.utils import timezone 
+
 from manufacturingLists.models import ManufacturingTask
-import logging
-
-logger = logging.getLogger('WarehousePilot_app')
-
 
 def index(request):
     return HttpResponse("Hello, world. You're at manufacturing lists index.")
@@ -32,10 +32,9 @@ class StaffManufacturingTasksView(APIView):
     def get(self, request):
         try:
             user = request.user  # Logged-in user
-            logger.debug(f"Logged-in user: {user}, User ID: {user.user_id}")  # Debug
+            print(f"Logged-in user: {user}, User ID: {user.user_id}")  # Debug
 
             if getattr(user, 'role', None) != 'staff':
-                logger.error("Unauthorized access - User is not a staff member")
                 return Response(
                     {"error": "Unauthorized: User is not a staff member."},
                     status=status.HTTP_403_FORBIDDEN
@@ -49,12 +48,12 @@ class StaffManufacturingTasksView(APIView):
                 Q(welding_employee=user) |
                 Q(paint_employee=user)
             )
-            logger.debug(f"Retrieved tasks: {tasks}")  # Debug
+            print(f"Retrieved tasks: {tasks}")  # Debug
 
             response_data = []
 
             for task in tasks:
-                logger.debug(f"Processing task {task.manufacturing_task_id}")  # Debug
+                print(f"Processing task {task.manufacturing_task_id}")  # Debug
                 base_task_info = {
                     "manufacturing_id": task.manufacturing_task_id,
                     "qty": task.qty,
@@ -93,12 +92,12 @@ class StaffManufacturingTasksView(APIView):
                         "end_time": task.paint_end_time
                     })
 
-            logger.debug(f"Final response data: {response_data}")  # Debug
-            logger.info("Successfully retrieved all manufacturing tasks assigned to user %s", user.user_id)
+            print(f"Final response data: {response_data}")  # Debug
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error(f"Error: {traceback.format_exc()}")  # Full traceback
+            import traceback
+            print(f"Error: {traceback.format_exc()}")  # Full traceback
             return Response(
                 {"error": "An unexpected error occurred."}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -125,19 +124,16 @@ class CompleteManufacturingTask(APIView):
                 task.welding_end_time = timezone.now()  # Set the timestamp for welding
                 task.prod_qa = True  # Ensure the 'prod_qa' field is updated
             elif task.status == "production_qa":
-                logger.warning("Task %s is already at the Production QA stage (CompleteManufacturingTask)", task_id)
                 return JsonResponse({"message": "Task is already at the Production QA stage!"}, status=400)
 
             # Save the updated task status and the relevant end time
             task.save()
-            
-            logger.info("The status of task %s was successfully updated to %s", task_id, task.status)
+
             return JsonResponse({"message": f"Task status updated to {task.status}"}, status=200)
 
         except ManufacturingTask.DoesNotExist:
-            logger.error("Manufacturing task %s could not be found (CompleteManufacturingTask)", task_id)
             return JsonResponse({"error": "Task not found"}, status=404)
-        
         except Exception as e:
-            logger.error("Failed to update the status of the manufacturing task %s (CompleteManufacturingTask)", task_id)
             return JsonResponse({"error": str(e)}, status=500)
+
+

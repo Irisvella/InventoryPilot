@@ -11,9 +11,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from manufacturingLists.models import ManufacturingLists
 from .models import ManufacturingListItem, Orders
-import logging
-
-logger = logging.getLogger('WarehousePilot_app')
 
 class ManufacturingListView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -34,11 +31,9 @@ class ManufacturingListView(APIView):
                 for m_list in manufacturing_lists
             ]
 
-            logger.info("Successfully fetched the manufacturing lists %s", ','.join([str(x.manufacturing_list_id) for x in manufacturing_lists]))
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error("Failed to retrieve the manufacturing lists (ManufacturingListView)")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
@@ -77,24 +72,22 @@ class ManufacturingListItemsView(APIView):
                 for item in manufacturing_list_items
             ]
 
-            logger.info("Successfully fetched items to be manufactured from order %s", order_id)
             return Response(response_data, status=status.HTTP_200_OK)
 
         except Orders.DoesNotExist:
-            logger.error("Order could not be found (ManufacturingListItemsView)")
             return Response(
                 {"error": "Order not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except ManufacturingLists.DoesNotExist:
-            logger.error("No manufacturing list found for the given order (ManufacturingListItemsView)")
             return Response(
                 {"error": "No manufacturing list found for the given order"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            logger.error("Failed to fetch items to be manufactured from order %s (ManufacturingListItemsView)", order_id)
+            print(f"Error occurred: {str(e)}")
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+

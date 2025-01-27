@@ -16,8 +16,7 @@ from .serializers import StaffSerializer
 from django.core.exceptions import ValidationError
 import logging
 
-# Django logger for backend
-logger = logging.getLogger('WarehousePilot_app')
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 def home(request):
@@ -37,13 +36,9 @@ class ManageUsersView(APIView):
         try:
             staffData = users.objects.all()
             serializer = StaffSerializer(staffData, many=True)
-            if serializer is not None:
-                logger.info("Manage Users - Successfully retrieved all user's information.")
             return Response(serializer.data)
         except Exception as e:
-            logger.error("Could not retrieve users from database")
             return Response({"error": str(e)}, status=500)
-
 
 # Adding Users:  Retrieve user input and add to database
 class AddUserView(APIView):
@@ -56,10 +51,9 @@ class AddUserView(APIView):
             data = request.data
             print(data)
             if users.objects.filter(email=data['email']).exists(): # checks using email - userid instead?
-                logger.error("User with this email already exists")
                 return Response({"error": "User with this email already exists"}, status=400)
             else:
-                logger.debug("Creating user")
+                print("Creating user")
                 user = users.objects.create_user(
                     username=data['username'],
                     password = data['password'],
@@ -71,12 +65,9 @@ class AddUserView(APIView):
                     dob = data['dob']
 
                 )
-                logger.info("User created successfully")
                 return Response({"message": "User created successfully"})
-
               
         except Exception as e:
-            logger.error("Failed to create a new user.")
             return Response({"error": str(e)}, status=500)
         
 
@@ -126,7 +117,7 @@ class EditUserView(APIView):
             logger.error(f"User with user_id {user_id} not found")
             return Response({"error": "User not found"}, status=404)
         except ValidationError as ve:
-            logger.error(f"Validation {str(ve)}")
+            logger.error(f"Validation error: {str(ve)}")
             return Response({"error": str(ve)}, status=400)
         except Exception as e:
             logger.error(f"Error in EditUserView.put: {str(e)}")
@@ -156,3 +147,7 @@ class DeleteUserView(APIView):
         except Exception as e:
             logger.error(f"An error occurred while deleting user: {str(e)}")
             return Response({"error": f"An error occurred: {str(e)}"}, status=500)
+        
+        
+        
+        
