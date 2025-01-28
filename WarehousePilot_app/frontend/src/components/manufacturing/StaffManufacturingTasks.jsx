@@ -20,6 +20,9 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -44,7 +47,7 @@ const StaffManufacturingTasks = () => {
       }
 
       const response = await axios.get(
-        "http://127.0.0.1:8000/staff_dashboard/staff_manufacturing_tasks/",
+        `${API_BASE_URL}/staff_dashboard/staff_manufacturing_tasks/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -84,7 +87,7 @@ const StaffManufacturingTasks = () => {
       setIsCompleteLoading((prev) => ({ ...prev, [taskId]: true })); // Set loading for this task
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `http://127.0.0.1:8000/staff_dashboard/complete_task/${taskId}/`,
+        `${API_BASE_URL}/staff_dashboard/complete_task/${taskId}/`,
         { next_stage: nextStage },
         {
           headers: {
@@ -222,6 +225,3 @@ const StaffManufacturingTasks = () => {
 };
 
 export default StaffManufacturingTasks;
-
-
-

@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Avatar from "./Avatar"; // Ensure the correct path
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const Sidebar = ({ isOpen }) => {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ const Sidebar = ({ isOpen }) => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://127.0.0.1:8000/auth/profile/",
+            `${API_BASE_URL}/auth/profile/`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }

@@ -8,6 +8,8 @@ import Button from "@mui/material/Button";
 import SideBar from "../dashboard_sidebar1/App";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function ManageUsersPage() {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [userData, setUserData] = useState(null);
@@ -24,7 +26,7 @@ export default function ManageUsersPage() {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    const response = await axios.get('http://127.0.0.1:8000/auth/profile/', {
+                    const response = await axios.get(`${API_BASE_URL}/auth/profile/`, {
                         headers: { Authorization: `Bearer ${token}` },
                     });
                     setUserData(response.data);
