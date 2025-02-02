@@ -10,6 +10,7 @@ import {
   Pagination,
   Button,
   Checkbox,
+  Dropdown,
 } from "@nextui-org/react";
 import { SearchIcon } from "@nextui-org/shared-icons";
 import axios from "axios";
@@ -21,9 +22,6 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const QATasks = () => {
   const [filterValue, setFilterValue] = useState("");
   const [rows, setRows] = useState([]);
@@ -31,9 +29,9 @@ const QATasks = () => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
-
-
-
+  const [manuIdFilter, setManuIdFilter] = useState("");
+  const [skuIdFilter, setSkuIdFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   // Fetch QA tasks
   const fetchTasks = async () => {
@@ -45,8 +43,7 @@ const QATasks = () => {
         return;
       }
       const response = await axios.get(
-        `${API_BASE_URL}/qa_dashboard/qa_tasks/`
-,
+        "http://127.0.0.1:8000/qa_dashboard/qa_tasks/",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -82,7 +79,7 @@ const QATasks = () => {
   const handleUpdate = async (taskId, prodQaValue, paintQaValue, finalQaValue) => {
     try {
       await axios.post(
-        `${API_BASE_URL}/qa_dashboard/qa_tasks/update/`,
+        "http://127.0.0.1:8000/qa_dashboard/qa_tasks/update/",
         {
           manufacturing_task_id: taskId,
           prod_qa: prodQaValue,
@@ -112,7 +109,7 @@ const QATasks = () => {
       console.log("Payload being sent to update status:", payload);
   
       const response = await axios.post(
-        `${API_BASE_URL}/qa_dashboard/qa_tasks/update_status/`,
+        "http://127.0.0.1:8000/qa_dashboard/qa_tasks/update_status/",
         payload,
         {
           headers: {
@@ -140,7 +137,7 @@ const QATasks = () => {
 
     try {
       await axios.post(
-        `${API_BASE_URL}/qa_dashboard/qa_tasks/report_error/`,
+        "http://127.0.0.1:8000/qa_dashboard/qa_tasks/report_error/",
         {
           manufacturing_task_id: taskId,
           subject,
@@ -162,15 +159,29 @@ const QATasks = () => {
   };
 
   const filteredRows = useMemo(() => {
-    if (!filterValue.trim()) return rows;
-    const searchTerm = filterValue.toLowerCase();
-    return rows.filter((row) =>
-      Object.values(row).some((value) =>
-        value?.toString().toLowerCase().includes(searchTerm)
-      )
-    );
-  }, [rows, filterValue]);
+    let result = rows;
+    if (manuIdFilter.trim()) {
+      result = result.filter((row) =>
+        row.manufacturing_id
+          .toString()
+          .toLowerCase()
+          .includes(manuIdFilter.toLowerCase())
+      );
+    }
 
+    if (skuIdFilter.trim()) {
+      result = result.filter((row) =>
+        row.sku_color.toLowerCase().includes(skuIdFilter.toLowerCase())
+      );
+    }
+    if (statusFilter) {
+      result = result.filter((row) => row.status === statusFilter);
+    }
+  
+    return result;
+  }, [rows, manuIdFilter, skuIdFilter, statusFilter]);
+  
+  
   const paginatedRows = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -191,14 +202,38 @@ const QATasks = () => {
                 {error}
               </div>
             )}
-            <Input
-              size="md"
-              placeholder="Search tasks"
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              endContent={<SearchIcon className="text-default-400" width={16} />}
-              className="w-72 mb-4"
-            />
+          <div className="flex gap-4 mb-4">
+  <Input
+    size="md"
+    placeholder="Search by Manu ID"
+    value={manuIdFilter}
+    onChange={(e) => setManuIdFilter(e.target.value)}
+    endContent={<SearchIcon className="text-default-400" width={16} />}
+    className="w-72"
+  />
+  <Input
+    size="md"
+    placeholder="Search by SKU ID"
+    value={skuIdFilter}
+    onChange={(e) => setSkuIdFilter(e.target.value)}
+    endContent={<SearchIcon className="text-default-400" width={16} />}
+    className="w-72"
+  />
+   <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="border rounded px-2 py-1 w-48"
+  >
+    <option value="" disabled hidden>
+    Search by Status
+    </option>
+    <option value="In Progress">In Progress</option>
+    <option value="Error">Error</option>
+    <option value="Completed">Completed</option>
+  </select>
+</div>
+
+          
             {loading ? (
               <div className="flex justify-center items-center h-64">
                 <div>Loading...</div>
@@ -272,7 +307,7 @@ const QATasks = () => {
                 }
               }}
             >
-              Error Reported
+              Error Fixed
             </Button>
           )}
         </div>
@@ -316,3 +351,4 @@ const QATasks = () => {
 };
 
 export default QATasks;
+
