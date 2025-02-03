@@ -33,3 +33,10 @@ class InventoryPicklistItem(models.Model):
       sku_color = models.ForeignKey(Part, on_delete=models.CASCADE)
       amount = models.IntegerField()
       status = models.BooleanField() # True if picked, False if not picked
+      
+class InventoryPicklistItemLocations(models.Model):
+    auto_id = models.AutoField(primary_key=True)
+    picklist_item_id = models.ForeignKey(InventoryPicklistItem, on_delete=models.CASCADE)
+    inventory_id = models.ForeignKey(Inventory, on_delete=models.CASCADE)   
+#note that the location in inventory cannot directly be the foreign key since it is not a unique field in the Inventory table
+# hence the inventory id was used as an FK and the locations can be found from there
