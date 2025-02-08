@@ -158,7 +158,8 @@ class GenerateInventoryAndManufacturingListsView(APIView):
         except ManufacturingLists.DoesNotExist:
             manuList = None
             logger.error("Manufacturing list for order %s does not exist (GenerateInventoryAndManufacturingListsView)", orderID)
-            return Response({'error':'manufacturing list does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            #this return response does not make sense because it is possible for an order to not have a manufacturing list
+            #return Response({'error':'manufacturing list does not exist'}, status=status.HTTP_404_NOT_FOUND)
         
         logger.debug(f"manufacturing list object: {manuList}")
         if manuList != None:
