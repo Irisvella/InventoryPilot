@@ -177,6 +177,23 @@ class GenerateInventoryAndManufacturingListsView(APIView):
         logger.debug(f"manufacturing list object: {manuList}")
         if manuList != None:
             logger.debug("All Manufacturing List Items: %s", ', '.join([str(x) for x in ManufacturingListItem.objects.filter(manufacturing_list_id = manuList)]))
+        logger.debug(f"manufacturing list object: {manuList}")
+        try:
+            print("getting inventory stuff")
+            inventoryPicklist = InventoryPicklist.objects.get(order_id = order)
+            print("got picklist")
+            print(f"got picklist {inventoryPicklist.__dict__}")
+            picklistItems = InventoryPicklistItem.objects.filter(picklist_id = inventoryPicklist)
+            print(f"got picklist items {picklistItem.__dict__}")
+            inventoryLocations = InventoryPicklistItemLocations.objects.filter(picklist_item_id__in = picklistItems.values_list("picklist_item_id", flat=True))
+            for i in inventoryLocations:
+                print(f"got locations {i.__dict__}")
+            if picklistItems != None:
+                logger.debug("All Inventory Picklist Items: %s", ', '.join([str(x) for x in picklistItems]))
+            if inventoryLocations != None:
+                logger.debug("All Inventory Picklist Locations: %s", ', '.join([str(x) for x in inventoryLocations]))
+        except:
+            logger.error("couldn't retrieve one of these objects")
         #'''
 
         logger.info("Successfully generated the inventory picklist and manufacturing for order %s", orderID)
