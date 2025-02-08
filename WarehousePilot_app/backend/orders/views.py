@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from django.http import HttpResponse
 from rest_framework.response import Response
 from .models import Orders, OrderPart
-from inventory.models import Inventory, InventoryPicklist, InventoryPicklistItem
+from inventory.models import Inventory, InventoryPicklist, InventoryPicklistItem, InventoryPicklistItemLocations
 from parts.models import Part
 from manufacturingLists.models import ManufacturingLists, ManufacturingListItem
 from django.db.models import Sum
@@ -74,9 +74,11 @@ class GenerateInventoryAndManufacturingListsView(APIView):
             manufacturingList= ManufacturingLists(order_id=order, status='Pending')
             inventoryPicklistItems = []
             manuListItems = []
+            picklistLocations = []
             for s in inventorySkus: #loop through the unique matching inventory sku set
+                matchingInventoryObjects = Inventory.objects.filter(sku_color=Part.objects.get(sku_color=s))
                 # find the total of the quantity of each unique sku in inventory, aggregating all the inventory objects with the same sku together
-                totalInventoryQty = Inventory.objects.filter(sku_color=Part.objects.get(sku_color=s)).aggregate(total=Sum('qty'))['total']
+                totalInventoryQty = matchingInventoryObjects.aggregate(total=Sum('qty'))['total']
                 logger.debug(f"total inventory qty: {totalInventoryQty}")
                 ##orderQty = OrderPart.objects.get(order_id=order, sku_color=s).__getattribute__("qty")
                 orderQty = OrderPart.objects.filter(order_id=order, sku_color=s).aggregate(total=Sum('qty'))['total']
@@ -99,9 +101,20 @@ class GenerateInventoryAndManufacturingListsView(APIView):
                         x.save()
 
                 #add the picklist item with the appropriate amount to the list of inventory picklist items
-                inventoryPicklistItems.append(InventoryPicklistItem(picklist_id = inventoryPicklist, sku_color=Part.objects.get(sku_color=s), amount = picklistQty, status = False))
+                picklistItem = InventoryPicklistItem(picklist_id = inventoryPicklist, sku_color=Part.objects.get(sku_color=s), amount = picklistQty, status = False)
+                inventoryPicklistItems.append(picklistItem)
+                #create the picklist item locations
+                print("creating locations")
+                for i in matchingInventoryObjects:
+                    print(f"inventory object: {i.__dict__}")
+                    print(f"picklist item object: {picklistItem.__dict__}")
+                    location = InventoryPicklistItemLocations(picklist_item_id=picklistItem, inventory_id = i)
+                    print(f"location object: {location.__dict__}")
+                    picklistLocations.append(location)
             #bulk create all the inventory picklist items in the database
             InventoryPicklistItem.objects.bulk_create(inventoryPicklistItems)
+            #bulk create all the inventory picklist item locations
+            InventoryPicklistItemLocations.objects.bulk_create(picklistLocations)
             #'''
             #logger.debug("All Picklist Items: %s", ', '.join([str(x) for x in InventoryPicklistItem.objects.filter(picklist_id=inventoryPicklist)])) inventoryPicklist is referred outside the scope of the if block
             #'''
