@@ -12,3 +12,4 @@ class Part(models.Model):
     lbs1400 = models.FloatField(null=True)
     crate_size = models.CharField(max_length=25,null=True)
     image =  models.ImageField(null=True)
+    barcode = models.CharField(null=True, max_length=255, unique=True)
