@@ -5,13 +5,13 @@ from .models import Part
 
 class VerifyBarcode(APIView):
     """
-    API endpoint for handling barcode verification and CRUD operations for Part objects.
+    API endpoint for handling barcode verification for Part objects.
     """
 
     def get(self, request, format=None):
         """
         Retrieve all parts or a specific part using a barcode query parameter.
-        Example: GET /api/verify-barcode/?barcode=123456
+        
         """
         barcode = request.query_params.get("barcode", None)
 
