@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import NavBar from "../navbar/App";
-
+import BarcodeScanner from '../scanner/BarcodeScanner';
 import SideBar from "../dashboard_sidebar1/App";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -94,6 +94,9 @@ function AccountManagement() {
           </div>
         </div>
       </div>
+
+      <BarcodeScanner />
+      
     </div>
   );
 }
