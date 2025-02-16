@@ -21,7 +21,6 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const QATasks = () => {
@@ -32,7 +31,13 @@ const QATasks = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
-  // Fetch  QA tasks from the backend.
+  // New state variables for functional filters
+  const [prodQaFilter, setProdQaFilter] = useState("all");
+  const [paintQaFilter, setPaintQaFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dueDateFilter, setDueDateFilter] = useState("");
+
+  // Fetch QA tasks from the backend.
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -76,7 +81,7 @@ const QATasks = () => {
   }, []);
 
   // Update Production & Paint QA statuses.
-  
+
   const handleUpdate = async (taskId, prodQaValue, paintQaValue) => {
     try {
       await axios.post(
@@ -151,7 +156,6 @@ const QATasks = () => {
     }
   };
 
-
   const handleFinalQACheck = async (taskId) => {
     const confirmed = window.confirm("Are you sure you want to send this task to Pick & Pack?");
     if (confirmed) {
@@ -175,16 +179,44 @@ const QATasks = () => {
     }
   };
 
-  // Filter rows by search text.
+  // Function to clear all filters
+  const clearFilters = () => {
+    setFilterValue("");
+    setProdQaFilter("all");
+    setPaintQaFilter("all");
+    setStatusFilter("all");
+    setDueDateFilter("");
+  };
+
+  // Filter rows by search text and additional functional filters.
   const filteredRows = useMemo(() => {
-    if (!filterValue.trim()) return rows;
-    const searchTerm = filterValue.toLowerCase();
-    return rows.filter((row) =>
-      Object.values(row).some((value) =>
-        value?.toString().toLowerCase().includes(searchTerm)
-      )
-    );
-  }, [rows, filterValue]);
+    let filtered = rows;
+    if (prodQaFilter !== "all") {
+      filtered = filtered.filter((row) => row.prod_qa === prodQaFilter);
+    }
+    if (paintQaFilter !== "all") {
+      filtered = filtered.filter((row) => row.paint_qa === paintQaFilter);
+    }
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((row) => row.status === statusFilter);
+    }
+    if (dueDateFilter) {
+      filtered = filtered.filter(
+        (row) =>
+          row.due_date !== "N/A" &&
+          dayjs(row.due_date).format("YYYY-MM-DD") === dueDateFilter
+      );
+    }
+    if (filterValue.trim()) {
+      const searchTerm = filterValue.toLowerCase();
+      filtered = filtered.filter((row) =>
+        Object.values(row).some((value) =>
+          value?.toString().toLowerCase().includes(searchTerm)
+        )
+      );
+    }
+    return filtered;
+  }, [rows, filterValue, prodQaFilter, paintQaFilter, statusFilter, dueDateFilter]);
 
   const paginatedRows = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -195,32 +227,79 @@ const QATasks = () => {
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-gray-50">
       <SideBar />
       <div className="flex-1">
         <div className="mt-16 p-8">
-          <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold mb-6">QA Tasks</h1>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h1 className="text-3xl font-semibold text-gray-800 mb-6">QA Tasks</h1>
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
-            <Input
-              size="md"
-              placeholder="Search tasks"
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              endContent={<SearchIcon className="text-default-400" width={16} />}
-              className="w-72 mb-4"
-            />
+            {/* Filter row with clear filters button */}
+            <div className="flex flex-wrap items-center gap-4 mb-6">
+              <Input
+                size="md"
+                placeholder="Search tasks"
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                endContent={<SearchIcon className="text-gray-500" width={16} />}
+                className="w-72 rounded border-gray-300 focus:ring focus:ring-blue-200"
+              />
+              <select
+                value={prodQaFilter}
+                onChange={(e) => setProdQaFilter(e.target.value)}
+                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
+              >
+                <option value="all">All Production QA</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select
+                value={paintQaFilter}
+                onChange={(e) => setPaintQaFilter(e.target.value)}
+                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
+              >
+                <option value="all">All Paint QA</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
+              >
+                <option value="all">All Statuses</option>
+                <option value="in progress">In Progress</option>
+                <option value="error">Error</option>
+                <option value="pick and pack">Pick and Pack</option>
+              </select>
+              <input
+                type="date"
+                value={dueDateFilter}
+                onChange={(e) => setDueDateFilter(e.target.value)}
+                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
+              />
+              <Button
+                size="sm"
+                onClick={clearFilters}
+                className="rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+              >
+                Clear Filters
+              </Button>
+            </div>
             {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div>Loading...</div>
+              <div className="flex justify-center items-center h-64 text-gray-600 text-xl">
+                Loading...
               </div>
             ) : (
               <>
-                <Table aria-label="QA tasks" className="min-w-full">
+                <Table
+                  aria-label="QA tasks"
+                  className="min-w-full bg-white rounded-lg overflow-hidden shadow-md"
+                >
                   <TableHeader>
                     <TableColumn>Task ID</TableColumn>
                     <TableColumn>Qty</TableColumn>
@@ -234,7 +313,7 @@ const QATasks = () => {
                   </TableHeader>
                   <TableBody>
                     {paginatedRows.map((item) => (
-                      <TableRow key={item.id}>
+                      <TableRow key={item.id} className="hover:bg-gray-100 transition-colors">
                         <TableCell>{item.manufacturing_task_id}</TableCell>
                         <TableCell>{item.qty}</TableCell>
                         <TableCell>{item.sku_color}</TableCell>
@@ -263,7 +342,6 @@ const QATasks = () => {
                             }}
                           />
                         </TableCell>
-                        
                         <TableCell>
                           <div className="flex gap-2">
                             <Button
@@ -271,6 +349,7 @@ const QATasks = () => {
                               variant="flat"
                               color="danger"
                               onClick={() => handleReportError(item.manufacturing_task_id)}
+                              className="rounded"
                             >
                               Report Error
                             </Button>
@@ -280,8 +359,9 @@ const QATasks = () => {
                                 variant="flat"
                                 color="success"
                                 onClick={() => handleErrorFixed(item.manufacturing_task_id)}
+                                className="rounded"
                               >
-                              Error Reported
+                                Error Reported
                               </Button>
                             )}
                           </div>
@@ -302,8 +382,8 @@ const QATasks = () => {
                     ))}
                   </TableBody>
                 </Table>
-                <div className="flex justify-between items-center mt-4">
-                  <span>
+                <div className="flex justify-between items-center mt-6">
+                  <span className="text-sm text-gray-600">
                     Page {page} of {totalPages}
                   </span>
                   <Pagination
@@ -311,6 +391,7 @@ const QATasks = () => {
                     initialPage={1}
                     current={page}
                     onChange={(newPage) => setPage(newPage)}
+                    className="text-gray-600"
                   />
                 </div>
               </>
@@ -323,3 +404,5 @@ const QATasks = () => {
 };
 
 export default QATasks;
+
+
