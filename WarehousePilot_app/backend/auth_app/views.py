@@ -44,7 +44,7 @@ class LoginView(APIView):
                     'user': {
                         'username': user.username,
                         'role': user.role,
-                        'dob': user.dob,
+                        'date_of_hire': user.date_of_hire,
                         'email': user.email,
                         'first_name': user.first_name,
                         'last_name': user.last_name,

@@ -5,7 +5,7 @@ from parts.models import Part
 class Orders(models.Model):
     order_id = models.IntegerField(primary_key=True)
     estimated_duration = models.IntegerField(null=True)
-    status = models.CharField(max_length = 255, null=True)
+    status = models.CharField(max_length = 255, null=True, default="Not Started")
     due_date = models.DateField(null=True)
     start_timestamp = models.DateTimeField(null=True, blank=True, default=None)
 

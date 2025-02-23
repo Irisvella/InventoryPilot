@@ -17,7 +17,7 @@ import SideBar from "../dashboard_sidebar1/App";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-
+import NavBar from "../navbar/App";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -227,12 +227,14 @@ const QATasks = () => {
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
   return (
-    <div className="flex h-full bg-gray-50">
-      <SideBar />
+  <div style={{ marginTop: "-80px" }}>
+      <NavBar />
+      <SideBar /> {/* Add the SideBar component here */}
+      <div className="flex-1 p-6 mt-8" style={{ padding: "40px" }}>
       <div className="flex-1">
-        <div className="mt-16 p-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h1 className="text-3xl font-semibold text-gray-800 mb-6">QA Tasks</h1>
+        <div className="mt-4 p-8">
+          <div className="flex flex-col gap-6">
+            <h1 className="text-2xl font-bold mb-6">QA Tasks</h1>
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
@@ -399,6 +401,7 @@ const QATasks = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

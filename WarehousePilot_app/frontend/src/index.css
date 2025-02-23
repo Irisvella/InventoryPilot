@@ -6,6 +6,7 @@ body {
   margin: 0;
   padding: 0;
   font-size: 12px;
+  
   /* overflow: auto;
   Allow body to scroll */
   height: 100vh; /* Ensure body takes up full viewport height */

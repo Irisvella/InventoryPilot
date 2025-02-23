@@ -16,7 +16,7 @@ import SideBar from "../dashboard_sidebar1/App";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-
+import NavBar from "../navbar/App";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -131,13 +131,14 @@ const QAErrorListView = () => {
   const totalPages = Math.ceil(filteredErrors.length / rowsPerPage);
 
   return (
-    <div className="flex h-full">
-      <SideBar />
-
+    <div style={{ marginTop: "-80px" }}>
+    <NavBar />
+    <SideBar /> {/* Add the SideBar component here */}
+    <div className="flex-1 p-6" style={{ padding: "40px" }}>
       <div className="flex-1">
-        <div className="mt-16 p-8">
+        <div className="mt-8 p-8">
           <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold mb-6">QA Error Reports</h1>
+            <h1 className="text-xl font-bold">QA Error Reports</h1>
 
             {errorMsg && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -236,6 +237,7 @@ const QAErrorListView = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

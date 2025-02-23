@@ -24,7 +24,7 @@ class ManufacturingListItemsViewTest(APITestCase):
             password="testpassword",
             email="testuser@example.com",
             role="Manager",
-            dob="1990-01-01",
+            date_of_hire="1990-01-01",
             first_name="Test",
             last_name="User",
             department="Manufacturing"

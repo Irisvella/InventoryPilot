@@ -30,7 +30,7 @@ class StaffManufacturingTasksViewTest(APITestCase):
             password="password",
             email="staffuser@example.com",
             role="staff",
-            dob="1990-01-01",
+            date_of_hire="1990-01-01",
             first_name="Staff",
             last_name="User",
             department="Manufacturing"
@@ -42,7 +42,7 @@ class StaffManufacturingTasksViewTest(APITestCase):
             password="password",
             email="nonstaffuser@example.com",
             role="employee",
-            dob="1990-01-01",
+            date_of_hire="1990-01-01",
             first_name="NonStaff",
             last_name="User",
             department="Inventory"

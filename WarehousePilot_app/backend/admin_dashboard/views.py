@@ -66,7 +66,7 @@ class AddUserView(APIView):
                     first_name=data['first_name'],
                     last_name=data['last_name'],
                     department=data['department'],
-                    dob = data['dob']
+                    date_of_hire = data['date_of_hire']
 
                 )
                 logger.info("User created successfully")

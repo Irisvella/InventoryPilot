@@ -22,7 +22,7 @@ class users(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20)
-    dob = models.DateField()
+    date_of_hire = models.DateField()
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     department = models.CharField(max_length=20)
@@ -30,9 +30,10 @@ class users(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'role', 'first_name', 'dob', 'last_name', 'department']
+    REQUIRED_FIELDS = ['email', 'role', 'first_name', 'date_of_hire', 'last_name', 'department']
 
     objects = CustomUserManager()
 
     def __str__(self):
         return self.username
+        

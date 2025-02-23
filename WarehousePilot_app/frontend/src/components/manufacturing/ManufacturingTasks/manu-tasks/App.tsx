@@ -427,6 +427,7 @@ export default function ManuTasksTable() {
 
   const bottomContent = useMemo(() => {
     return (
+      
       <div className="flex flex-col justify-between gap-2 px-2 py-2 sm:flex-row">
         <Pagination
           isCompact
@@ -461,7 +462,7 @@ export default function ManuTasksTable() {
   }
 
   return (
-    <div style={{ marginTop: "-80px" }}>
+    <div style={{ backgroundColor: "#F8F8F8", marginTop: "-80px", minHeight: "100vh" }}>
       <NavBar />
       <SideBar /> {/* Add the SideBar component here */}
       <div className="flex-1 p-6" style={{ padding: "40px" }}>

@@ -5,10 +5,10 @@
 # StartOrderView: Updates an order's status to 'In Progress' and sets the start timestamp.
 # InventoryPicklistView: Retrieves picklists for orders in progress, indicating if they are filled and their assigned employee.
 # InventoryPicklistItemsView: Fetches detailed items of a picklist for a given order, including location, SKU, quantity, and status.
-
+# CycleTimePerOrderView: Calculates the cycle time for each order that has been fully picked in the past month.
 
 from django.shortcuts import get_object_or_404
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import HttpResponse
@@ -30,7 +30,6 @@ from django.utils import timezone
 
 from django.shortcuts import get_object_or_404
 from datetime import datetime
-from django.utils import timezone 
 
 import logging
 
@@ -213,7 +212,6 @@ class OrdersView(APIView):
             logger.error("Failed to query orders from database (OrdersView)")
             return Response({"error": str(e)}, status=500)
         
-        
 
 class StartOrderView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -222,6 +220,12 @@ class StartOrderView(APIView):
     def post(self, request, order_id):
         try:
             order = get_object_or_404(Orders, order_id=order_id)
+            
+            # Ensure the default status is "Not Started" if it is NULL
+            if order.status is None:
+                order.status = "Not Started"
+                order.save()
+
 
             if order.status == 'In Progress':
                 return JsonResponse({'status': 'error', 'message': 'Order is already in progress'}, status=400)
@@ -244,7 +248,6 @@ class StartOrderView(APIView):
             # In case of any error, return error details
             logger.error(f"Failed to start order {order_id} (StartOrderView)")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-        
 
 
 class InventoryPicklistView(APIView):
@@ -281,8 +284,6 @@ class InventoryPicklistView(APIView):
         except Exception as e:
             logger.error("Failed to fetched all started orders (InventoryPicklistView)")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 
 class InventoryPicklistItemsView(APIView):
@@ -343,3 +344,41 @@ class InventoryPicklistItemsView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+class CycleTimePerOrderView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            past_month = datetime.now() - timedelta(days=30) # Get the date from 30 days ago
+
+            # Query to get the timestamps from each order
+            fetched_orders = Orders.all().values('order_id', 'start_timestamp').filter(start_timestamp__isnull=False)
+
+            orders = []
+
+            # Calculate cycle time for each order
+            for order in fetched_orders:
+                id = order['order_id']
+                try:
+                    picklist_completion = InventoryPicklist.objects.filter(order_id=id).values('picklist_complete_timestamp').first()
+                    logger.info(f"Picklist: {picklist_completion}") #debugging
+                    # Check if picklist completion is within the past month and has been completed
+                    if picklist_completion > past_month and picklist_completion is not None:
+                        completion_duration = datetime.fromtimestamp(picklist_completion) - datetime.fromtimestamp(order['start_timestamp'])
+                        orders.append({
+                            "order_id": id,
+                            "cycle_time": completion_duration.days
+                        })
+                except InventoryPicklist.DoesNotExist:
+                    logger.warning("Picklist could not be found for order %s (CycleTimePerOrderView)", id)
+            
+            # Send cycle times as response
+            logger.info("Successfully calculated cycle time per order for the past month")
+            return Response(orders)
+
+        except Exception as e:
+            logger.error("Failed to calculate cycle time per order (CycleTimePerOrderView)")
+            return Response({"error": str(e)}, status=500)

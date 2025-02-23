@@ -16,9 +16,12 @@ import {
 } from "@nextui-org/react";
 import { SearchIcon } from "@nextui-org/shared-icons";
 import axios from "axios";
-import {Spinner} from "@heroui/spinner";
+import { Spinner } from "@heroui/spinner";
 import { useNavigate } from "react-router-dom";
-
+import { color } from "framer-motion";
+import CopyText from "../orders/copy-text";
+import { Icon } from "@iconify/react";
+import { Chip } from "@nextui-org/react";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const InventoryPickList = () => {
@@ -29,7 +32,7 @@ const InventoryPickList = () => {
   const [page, setPage] = useState(1);
 
   const [userData, setUserData] = useState(null);
-  const rowsPerPage = 8;
+  const rowsPerPage = 10;
   const navigate = useNavigate();
 
   // For staff assignment modal
@@ -57,6 +60,12 @@ const InventoryPickList = () => {
   const paginatedRows = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
+
+    // If the filtered list has fewer pages, reset page number
+    if (start >= filteredRows.length) {
+      setPage(1); // Reset to first page if page number is out of range
+    }
+
     return filteredRows.slice(start, end);
   }, [page, filteredRows]);
 
@@ -120,14 +129,11 @@ const InventoryPickList = () => {
         setError("No authorization token found");
         return;
       }
-      const staffResp = await axios.get(
-        `${API_BASE_URL}/auth/retrieve_users`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const staffResp = await axios.get(`${API_BASE_URL}/auth/retrieve_users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       // staffResp.data => array of staff like [{ id, first_name, last_name }, ...]
       setStaffList(staffResp.data);
       console.log("staffResp.data =>", staffResp.data);
@@ -202,9 +208,14 @@ const InventoryPickList = () => {
   return (
     <div className="mt-16 p-8">
       <h1 className="text-2xl font-bold mb-6">Inventory Pick List</h1>
-      <h6 className="text-md font-bold">Few examples to test the different cases of orders being picked</h6>
-      <p>order have both inventory picklist and manufacturinglist 90171, 89851 ,89672</p>
-      <p>order have both inventory picklist and no  manufacturinglist 80555 </p>
+      <h6 className="text-md font-bold">
+        Few examples to test the different cases of orders being picked
+      </h6>
+      <p>
+        order have both inventory picklist and manufacturinglist 90171, 89851
+        ,89672
+      </p>
+      <p>order have both inventory picklist and no manufacturinglist 80555 </p>
       <p>order have none 89345 </p>
 
       {/* Error message */}
@@ -224,32 +235,95 @@ const InventoryPickList = () => {
           endContent={<SearchIcon className="text-default-400" width={16} />}
           className="w-72"
         />
+        <Button
+          color="default"
+          variant="faded"
+          onPress={() => {
+            // if (userRole === "admin" || userRole === "manager") {
+            //   navigate("/inventory_and_manufacturing_picklist");
+            // } else if (userRole === "staff") {
+            navigate("/orders"); // Will be changed to /assigned_picklist once the table is completed
+          }}
+        >
+          Go back
+        </Button>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
           Loading...
           <Spinner size="lg" />
-          
         </div>
       ) : (
         <>
-          <Table aria-label="Inventory Pick List" className="min-w-full">
-            <TableHeader>
-              <TableColumn>Order ID</TableColumn>
-              <TableColumn>Due Date</TableColumn>
-              <TableColumn>Already Filled</TableColumn>
-              <TableColumn>Assigned To</TableColumn>
-              <TableColumn>Action</TableColumn>
+          <Table
+            aria-label="Inventory Pick List"
+            className="min-w-full"
+            isHeaderSticky
+            bottomContentPlacement="outside"
+            selectionMode="multiple"
+            classNames={{
+              td: "before:bg-transparent",
+            }}
+            topContentPlacement="outside"
+          >
+            <TableHeader style={{ color: "black" }}>
+              <TableColumn className="text-gray-800 font-bold text-lg">
+                Order ID
+              </TableColumn>
+              <TableColumn className="text-gray-800 font-bold text-lg">
+                Due Date
+              </TableColumn>
+              <TableColumn className="text-gray-800 font-bold text-lg">
+                Already Filled
+              </TableColumn>
+              <TableColumn className="text-gray-800 font-bold text-lg">
+                Assigned To
+              </TableColumn>
+              <TableColumn className="text-gray-800 font-bold text-lg">
+                Action
+              </TableColumn>
             </TableHeader>
 
             <TableBody items={paginatedRows}>
               {(item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.order_id}</TableCell>
-                  <TableCell>{item.due_date}</TableCell>
+                  <TableCell>
+                    {item.order_id}
+                    <CopyText text={item.order_id.toString()} />{" "}
+                    {/* Ensure order_id is a string */}
+                  </TableCell>
+                  <TableCell className="flex items-center gap-2">
+                    <Icon
+                      icon="solar:calendar-linear"
+                      width={18}
+                      className="text-gray-500"
+                    />
+                    {item.due_date}
+                  </TableCell>
                   <TableCell>{item.already_filled ? "Yes" : "No"}</TableCell>
-                  <TableCell>{item.assigned_to || "Unassigned"}</TableCell>
+                  <TableCell>
+                    {item.assigned_to ? (
+                      <Chip
+                        className="capitalize"
+                        color="success"
+                        size="sm"
+                        variant="flat"
+                      >
+                        {item.assigned_to}
+                      </Chip>
+                    ) : (
+                      <Chip
+                        className="capitalize"
+                        color="default"
+                        size="sm"
+                        variant="flat"
+                      >
+                        Unassigned
+                      </Chip>
+                    )}
+                  </TableCell>
+
                   <TableCell>
                     <Button
                       color="primary"
@@ -317,10 +391,7 @@ const InventoryPickList = () => {
                 .map((staff) => {
                   const fullName = `${staff.first_name} ${staff.last_name}`;
                   return (
-                    <SelectItem
-                      key={staff.user_id} 
-                      value={staff.user_id}
-                    >
+                    <SelectItem key={staff.user_id} value={staff.user_id}>
                       {fullName}
                     </SelectItem>
                   );

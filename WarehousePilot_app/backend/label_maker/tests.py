@@ -19,7 +19,7 @@ class LabelMakerTests(APITestCase):
             password="testpass",
             role="admin", 
             email="test@email.com",
-            dob="2000-01-01",
+            date_of_hire="2000-01-01",
             first_name="Test",
             last_name="User",
             department="Testing"

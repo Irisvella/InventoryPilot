@@ -28,7 +28,7 @@ class ManageUsersViewTest(TestCase):
             username="admin",
             password="adminpassword",
             email="admin@example.com",
-            dob='1990-01-01',
+            date_of_hire='1990-01-01',
             department='Testing',
             role='admin',
             is_staff=False
@@ -40,7 +40,7 @@ class ManageUsersViewTest(TestCase):
             username="employee",
             password="employeepassword",
             email="employee@example.com",
-            dob='2025-12-29',
+            date_of_hire='2025-12-29',
             department='Testing',
             role='user',
             is_staff=True
@@ -84,7 +84,7 @@ class AddUserTests(APITestCase):
             email='adminuser@example.com',
             password='adminpassword',
             role='admin',
-            dob='1980-08-08',
+            date_of_hire='1980-08-08',
             first_name='Admin',
             last_name='User',
             department='Administration',
@@ -115,7 +115,7 @@ class AddUserTests(APITestCase):
             'first_name': 'New',
             'last_name': 'User',
             'department': 'Testing',
-            'dob': '1995-05-15'
+            'date_of_hire': '1995-05-15'
         }
         response = self.client.post(self.add_user_url, user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -139,7 +139,7 @@ class AddUserTests(APITestCase):
             'first_name': 'Another',
             'last_name': 'User',
             'department': 'Testing',
-            'dob': '1990-05-15'
+            'date_of_hire': '1990-05-15'
         }
         response = self.client.post(self.add_user_url, user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -170,7 +170,7 @@ class AddUserTests(APITestCase):
             'first_name': 'Unauth',
             'last_name': 'User',
             'department': 'Testing',
-            'dob': '2000-01-01'
+            'date_of_hire': '2000-01-01'
         }
         response = self.client.post(self.add_user_url, user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -186,7 +186,7 @@ class EditUserTests(APITestCase):
             email='editoruser@example.com',
             password='editorpassword',
             role='admin',
-            dob='1985-05-15',
+            date_of_hire='1985-05-15',
             first_name='Editor',
             last_name='User',
             department='Editing',
@@ -197,7 +197,7 @@ class EditUserTests(APITestCase):
             email='targetuser@example.com',
             password='targetpassword',
             role='staff',
-            dob='1990-01-01',
+            date_of_hire='1990-01-01',
             first_name='Target',
             last_name='User',
             department='Targeting',
@@ -310,7 +310,7 @@ class DeleteUserTests(APITestCase):
             email='deleteruser@example.com',
             password='deleterpassword',
             role='deleter',
-            dob='1980-08-08',
+            date_of_hire='1980-08-08',
             first_name='Deleter',
             last_name='User',
             department='Deleting',
@@ -321,7 +321,7 @@ class DeleteUserTests(APITestCase):
             email='targetuser@example.com',
             password='targetpassword',
             role='user',
-            dob='1990-01-01',
+            date_of_hire='1990-01-01',
             first_name='Target',
             last_name='User',
             department='Targeting',

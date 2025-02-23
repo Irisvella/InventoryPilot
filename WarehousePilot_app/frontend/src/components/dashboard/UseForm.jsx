@@ -14,7 +14,7 @@ export default function UserForm() {
   const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("");
   const [role, setRole] = useState("");
-  const [dob, setDob] = useState("");
+  const [date_of_hire, setDateOfHire] = useState("");
   const [feedback, setFeedback] = useState("Message");
   const [showModal, setShowModal] = useState(false);
   const [LinkToPage, setLinkToPage] = useState("");
@@ -26,7 +26,7 @@ export default function UserForm() {
 
   const typesOfUsers = ["Admin", "Manager", "Staff", "QA"];
   const today = new Date();
-  const minDOB = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+  // const minDate = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate()).toISOString().split('T')[0];
     // Check that the user is an admin (only admins should be able to navigate to this page and add users)
     useEffect(() => {
       const user = localStorage.getItem("user");
@@ -70,7 +70,7 @@ export default function UserForm() {
             setEmail(userData.email || "");
             setDepartment(userData.department || "");
             setRole(userData.role || "");
-            setDob(userData.dob ? userData.dob.split("T")[0] : "");
+            setDateOfHire(userData.date_of_hire ? userData.date_of_hire.split("T")[0] : "");
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error.response?.data || error.message);
@@ -98,10 +98,10 @@ export default function UserForm() {
       return;
     }
   
-    // Validate DOB (user must be at least 14 years old)
-    if (dob > minDOB) {
-      setFeedback("The user must be at least 14 years old. Please adjust the birthdate accordingly.");
-      setHeader("Error"); // Set the header to "Error" for invalid DOB
+    // Validate date of hire (user must be at least 14 years old)
+    if (date_of_hire > today) {
+      setFeedback("The staff's hire date cannot be in the future. Please adjust the date of hire accordingly.");
+      setHeader("Error"); // Set the header to "Error" for invalid date of hire
       setShowModal(true);
       return;
     }
@@ -114,7 +114,7 @@ export default function UserForm() {
         email,
         department,
         role,
-        dob,
+        date_of_hire,
       };
   
       if (!isEditMode) {
@@ -187,7 +187,7 @@ export default function UserForm() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               )}
-              <InputField label="DOB" type="date" value={dob} onChange={(e) => setDob(e.target.value)} minValue={minDOB}/>
+              <InputField label="Date Of Hire" type="date" value={date_of_hire} onChange={(e) => setDateOfHire(e.target.value)} minValue={today}/>
               <InputField label="Department" value={department} onChange={(e) => setDepartment(e.target.value)} />
               <Dropdown label="Role" options={typesOfUsers} value={role} required={true} onChange={(e) => setRole(e.target.value)} />
             </div>
