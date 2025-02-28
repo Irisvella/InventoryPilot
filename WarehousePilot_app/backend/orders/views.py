@@ -352,29 +352,34 @@ class CycleTimePerOrderView(APIView):
 
     def get(self, request):
         try:
-            past_month = datetime.now() - timedelta(days=30) # Get the date from 30 days ago
+            past_month = (datetime.now() - timedelta(days=30)).date() # Get the date from 30 days ago
 
             # Query to get the timestamps from each order
-            fetched_orders = Orders.all().values('order_id', 'start_timestamp').filter(start_timestamp__isnull=False)
-
+            fetched_orders = Orders.objects.all().values('order_id', 'start_timestamp').filter(start_timestamp__isnull=False)
             orders = []
 
             # Calculate cycle time for each order
             for order in fetched_orders:
                 id = order['order_id']
                 try:
-                    picklist_completion = InventoryPicklist.objects.filter(order_id=id).values('picklist_complete_timestamp').first()
-                    logger.info(f"Picklist: {picklist_completion}") #debugging
+                    picklist_completion = InventoryPicklist.objects.all().values('picklist_complete_timestamp').filter(order_id=id).first()
+
+                    # Skip orders that have not been fully picked
+                    if picklist_completion is None or picklist_completion['picklist_complete_timestamp'] is None:
+                        continue
+
                     # Check if picklist completion is within the past month and has been completed
-                    if picklist_completion > past_month and picklist_completion is not None:
-                        completion_duration = datetime.fromtimestamp(picklist_completion) - datetime.fromtimestamp(order['start_timestamp'])
+                    if (picklist_completion['picklist_complete_timestamp'].date() > past_month and picklist_completion['picklist_complete_timestamp'].date() is not None): 
+                        # Calculate cycle time
+                        completion_duration = picklist_completion['picklist_complete_timestamp'].date() - order['start_timestamp'].date()
+                        # Add order's cycle time to the return list
                         orders.append({
                             "order_id": id,
                             "cycle_time": completion_duration.days
                         })
                 except InventoryPicklist.DoesNotExist:
                     logger.warning("Picklist could not be found for order %s (CycleTimePerOrderView)", id)
-            
+                
             # Send cycle times as response
             logger.info("Successfully calculated cycle time per order for the past month")
             return Response(orders)
