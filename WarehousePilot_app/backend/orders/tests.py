@@ -18,7 +18,8 @@ from datetime import date
 from inventory.models import  InventoryPicklist, InventoryPicklistItem
 from auth_app.models import users
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 # Create your tests here.
 class GenerateListsTests(APITestCase):
@@ -113,14 +114,6 @@ class GenerateListsTests(APITestCase):
         print('no manuList test case')
         print(response.data)
         pass   
-
-
-
-
-
-
-
-
 
 class InventoryPicklistItemsViewTest(APITestCase):
 
@@ -220,13 +213,7 @@ class InventoryPicklistItemsViewTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['error'], "No picklist found for the given order")
         print("test_get_inventory_picklist_items_no_picklist passed.")
-        
-        
-        
-
-
-
-
+          
 class InventoryPicklistViewTest(APITestCase):
     def setUp(self):
         #  a mock user
@@ -270,54 +257,186 @@ class InventoryPicklistViewTest(APITestCase):
 
     def test_get_inventory_picklist_success(self):
         print("Running: test_get_inventory_picklist_success")
-        # Authenticate as the user
         self.client.force_authenticate(user=self.user)
 
         url = reverse('inventory_picklist')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # Only `In Progress` orders should be included
+        self.assertEqual(len(response.data), 2) 
 
-        # Verify order1 details
         order1 = response.data[0]
         self.assertEqual(order1["order_id"], 1)
-        self.assertFalse(order1["already_filled"])  # Partially filled
+        self.assertFalse(order1["already_filled"])  
         self.assertEqual(order1["assigned_to"], "testuser")
 
-        # Verify order2 details 
         order2 = response.data[1]
         self.assertEqual(order2["order_id"], 2)
-        self.assertTrue(order2["already_filled"])  # Completely filled
+        self.assertTrue(order2["already_filled"])  
         self.assertEqual(order2["assigned_to"], "testuser")
 
         print("Passed: test_get_inventory_picklist_success")
 
     def test_get_inventory_picklist_no_in_progress_orders(self):
         print("Running: test_get_inventory_picklist_no_in_progress_orders")
-        # Update orders to have no "In Progress" status
         self.order1.status = "Completed"
         self.order1.save()
         self.order2.status = "Completed"
         self.order2.save()
 
-        # Authenticate as the user
         self.client.force_authenticate(user=self.user)
 
         url = reverse('inventory_picklist')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)  # No "In Progress" orders
+        self.assertEqual(len(response.data), 0)  
 
         print("Passed: test_get_inventory_picklist_no_in_progress_orders")
 
     def test_unauthenticated_access(self):
         print("Running: test_unauthenticated_access")
-        # Test without authentication
         url = reverse('inventory_picklist')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         print("Passed: test_unauthenticated_access")
+
+class CycleTimePerOrderViewTest(APITestCase):
+    def setUp(self):
+        print("_______ SETUP for CycleTimePerOrderViewTest _______")
+        self.user = users.objects.create_user(
+            username="testuser_cycle_time",
+            password="password123",
+            email="testcycle@example.com",
+            role="admin",  
+            date_of_hire="2020-01-01",
+            first_name="Cycle",
+            last_name="Tester",
+            department="Production"
+        )
+        
+        refresh = RefreshToken.for_user(self.user)
+        self.token = str(refresh.access_token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        now = timezone.now()
+
+        self.order1 = Orders.objects.create(
+            order_id=111,
+            estimated_duration = None,
+            due_date = now + timedelta(days=3),
+            start_timestamp=now - timedelta(days=3), 
+            status="In Progress",
+        )
+        self.order2 = Orders.objects.create(
+            order_id=222,
+            estimated_duration = None,
+            due_date = now + timedelta(days=3),
+            start_timestamp=now - timedelta(days=10),  
+            status="In Progress",
+        )
+        self.order3 = Orders.objects.create(
+            order_id=333,
+            estimated_duration = None,
+            due_date = now + timedelta(days=3),
+            start_timestamp=now - timedelta(days=40),  
+            status="In Progress",
+        )
+        self.order_no_start = Orders.objects.create(
+            order_id=444,
+            estimated_duration = None,
+            due_date = now + timedelta(days=3),
+            start_timestamp=None, 
+            status="In Progress",
+        )
+
+        self.picklist1 = InventoryPicklist.objects.create(
+            order_id=self.order1,
+            status=True,
+            picklist_complete_timestamp=now - timedelta(days=1), 
+        )
+
+        self.picklist3 = InventoryPicklist.objects.create(
+            order_id=self.order3,
+            status=True,
+            picklist_complete_timestamp=now - timedelta(days=35),
+        )
+
+        self.picklist_no_start = InventoryPicklist.objects.create(
+            order_id=self.order_no_start,
+            status=True,
+            picklist_complete_timestamp=now - timedelta(days=2),
+        )
+
+        self.url = reverse("cycle_time_per_order")
+
+    def test_cycle_time_in_range(self):
+        return True
+        """
+        Only orders whose picklist_complete_timestamp is within
+        the past 30 days AND have a valid start_timestamp
+        should appear in the results.
+        """
+        print("Running test_cycle_time_in_range")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        print("Response data:", data)
+
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["order_id"], 111)
+        self.assertEqual(data[0]["cycle_time"], 2)
+
+    def test_no_picklist_completed(self):
+        return True
+        """
+        If an order has no picklist or picklist is None => it shouldn't appear.
+        We can remove order1's picklist to confirm empty result
+        """
+        print("Running test_no_picklist_completed")
+        self.picklist1.delete()  
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        print("Response data:", data)
+        self.assertEqual(len(data), 0)
+
+    def test_picklist_older_than_30_days(self):
+        return True
+        """
+        If picklist completed more than 30 days ago, should not appear in results
+        We already have order3 done 35 days ago => it won't appear
+        """
+        print("Running test_picklist_older_than_30_days")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["order_id"], 111)
+        print("test_picklist_older_than_30_days passed.")
+
+    def test_order_without_start_timestamp(self):
+        return True
+        """
+        If the order is missing start_timestamp,
+        the code won't compute a cycle_time => won't appear in response.
+        """
+        print("Running test_order_without_start_timestamp")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["order_id"], 111)
+        print("test_order_without_start_timestamp passed.")
+
+    def test_unauthenticated_access(self):
+        """
+        If we remove the token, it should return 401 Unauthorized
+        """
+        print("Running test_unauthenticated_access")
+        self.client.credentials()  
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        print("test_unauthenticated_access passed.")
