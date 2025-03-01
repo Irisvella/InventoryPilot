@@ -1,6 +1,6 @@
 "use client";
 
-import type {CardProps} from "@nextui-org/react";
+import type {CardProps} from "@heroui/react";
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -16,7 +16,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import NotificationItem from "./notification-item";
 

@@ -1,5 +1,5 @@
 import React, {forwardRef, memo} from "react";
-import {cn} from "@nextui-org/react";
+import {cn} from "@heroui/react";
 
 import {statusColorMap, type StatusOptions} from "./data";
 

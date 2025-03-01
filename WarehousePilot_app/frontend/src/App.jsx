@@ -6,8 +6,8 @@ import { HeroUIProvider } from "@heroui/react";
 // Main App Component
 function App() {
   return (
+    <HeroUIProvider>
     <Router>
-      <HeroUIProvider>
       <Routes>
         
         {/* Map through predefined routes */}
@@ -19,8 +19,8 @@ function App() {
           />
         ))}
       </Routes>
-      </HeroUIProvider>
     </Router>
+    </HeroUIProvider>
   );
 }
 

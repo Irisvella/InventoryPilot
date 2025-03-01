@@ -9,8 +9,8 @@ import {
   Input,
   Pagination,
   Button,
-} from "@nextui-org/react";
-import { SearchIcon } from "@nextui-org/shared-icons";
+} from "@heroui/react";
+import { SearchIcon } from "@heroui/shared-icons";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";

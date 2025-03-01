@@ -12,8 +12,8 @@ import {
   YAxis,
   CartesianGrid
 } from "recharts";
-import { Input, Button } from "@nextui-org/react";
-import { SearchIcon } from "@nextui-org/shared-icons";
+import { Input, Button } from "@heroui/react";
+import { SearchIcon } from "@heroui/shared-icons";
 import axios from "axios";
 
 const COLORS = ["#950606", "#ca3433"];

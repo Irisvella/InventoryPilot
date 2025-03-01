@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tooltip } from "@nextui-org/react"; // Tooltip for better UX
+import { Tooltip } from "@heroui/react"; // Tooltip for better UX
 import { Icon } from "@iconify/react"; // Import icons from iconify
 
 interface CopyTextProps {

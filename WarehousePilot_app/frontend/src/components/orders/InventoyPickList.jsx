@@ -13,15 +13,15 @@ import {
   ModalContent,
   Select,
   SelectItem,
-} from "@nextui-org/react";
-import { SearchIcon } from "@nextui-org/shared-icons";
+} from "@heroui/react";
+import { SearchIcon } from "@heroui/shared-icons";
 import axios from "axios";
 import { Spinner } from "@heroui/spinner";
 import { useNavigate } from "react-router-dom";
 import { color } from "framer-motion";
 import CopyText from "../orders/copy-text";
 import { Icon } from "@iconify/react";
-import { Chip } from "@nextui-org/react";
+import { Chip } from "@heroui/react";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const InventoryPickList = () => {
@@ -374,7 +374,7 @@ const InventoryPickList = () => {
         </>
       )}
       {/* Staff Assignment Modal */}
-      <Modal isOpen={assignModalOpen} onClose={handleCloseModal}>
+      <Modal isOpen={assignModalOpen} onClose={handleCloseModal} isDismissable={false}>
         <ModalContent>
           <div className="p-4">
             <h2 className="text-xl font-semibold mb-4">Assign Staff</h2>

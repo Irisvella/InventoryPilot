@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Input, Button } from "@nextui-org/react";
+import { Input, Button } from "@heroui/react";
 import type { Inventory, StatusOptions } from "./data";
 import { toast } from "react-toastify";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

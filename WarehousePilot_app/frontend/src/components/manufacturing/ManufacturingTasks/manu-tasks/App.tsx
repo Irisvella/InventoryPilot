@@ -1,7 +1,7 @@
 "use client";
 
 import SideBar from "../../../dashboard_sidebar1/App"; 
-import type {Selection, SortDescriptor} from "@nextui-org/react";
+import type {Selection, SortDescriptor} from "@heroui/react";
 import type {ColumnsKey, ManufacturingTask} from "./data";
 import type {Key} from "@react-types/shared";
 
@@ -23,11 +23,11 @@ import {
   Tooltip,
   useButton,
   Chip,
-} from "@nextui-org/react";
-import {SearchIcon} from "@nextui-org/shared-icons";
+} from "@heroui/react";
+import {SearchIcon} from "@heroui/shared-icons";
 import React, {useMemo, useRef, useCallback, useState, useEffect} from "react";
 import {Icon} from "@iconify/react";
-import {cn} from "@nextui-org/react";
+import {cn} from "@heroui/react";
 import { saveAs } from 'file-saver';
 
 import {CopyText} from "./copy-text";

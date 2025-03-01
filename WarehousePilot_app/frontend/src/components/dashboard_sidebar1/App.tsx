@@ -9,7 +9,7 @@ import React, { useState, useEffect } from "react";import {
   ScrollShadow,
   Spacer,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {Icon} from "@iconify/react";
 
 import {getSidebarItems} from "./sidebar-items";

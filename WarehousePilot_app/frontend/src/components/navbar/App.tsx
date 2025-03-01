@@ -1,4 +1,4 @@
-import type { NavbarProps } from "@nextui-org/react";
+import type { NavbarProps } from "@heroui/react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
 import {
@@ -11,7 +11,7 @@ import {
   NavbarMenuToggle,
   Link,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 export default function NavBar(props: NavbarProps) {
   // const [isMobile, setIsMobile] = useState(window.innerWidth < 770);

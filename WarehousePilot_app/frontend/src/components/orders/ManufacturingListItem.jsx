@@ -9,11 +9,11 @@ import {
   TableCell,
   Input,
   Pagination,
-} from "@nextui-org/react";
-import { SearchIcon } from "@nextui-org/shared-icons";
+} from "@heroui/react";
+import { SearchIcon } from "@heroui/shared-icons";
 import axios from "axios";
 import SideBar from "../dashboard_sidebar1/App";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

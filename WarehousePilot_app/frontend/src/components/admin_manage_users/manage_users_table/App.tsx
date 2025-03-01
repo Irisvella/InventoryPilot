@@ -1,6 +1,6 @@
 "use client";
 
-import type {Selection, SortDescriptor} from "@nextui-org/react";
+import type {Selection, SortDescriptor} from "@heroui/react";
 import type {ColumnsKey, StatusOptions, Users} from "./data";
 import type {Key} from "@react-types/shared";
 import SideBar from "../../dashboard_sidebar1/App";
@@ -30,11 +30,11 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@nextui-org/react";
-import {SearchIcon} from "@nextui-org/shared-icons";
+} from "@heroui/react";
+import {SearchIcon} from "@heroui/shared-icons";
 import React, {useMemo, useRef, useCallback, useState, useEffect} from "react";
 import {Icon} from "@iconify/react";
-import {cn} from "@nextui-org/react";
+import {cn} from "@heroui/react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { confirmDelete } from './data';
