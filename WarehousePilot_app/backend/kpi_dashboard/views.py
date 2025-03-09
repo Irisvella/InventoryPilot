@@ -248,10 +248,10 @@ def get_warehouse_throughput(request):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
     # Get all manufacturing tasks with status 'completed'
-    # completed_tasks = ManufacturingTask.objects.filter(status="completed")
+    completed_tasks = ManufacturingTask.objects.filter(status="completed")
 
-    # Package data in JSON and send response
+    # Log completed tasks as list
+    logger.info(f"Completed tasks: {list(completed_tasks.values())}")
 
-        # logger.debug(f"Final data count: {len(data)}")
-        # return JsonResponse(data, safe=False)
-    return JsonResponse({"message": "This is warehouse throughput backend"})
+    # Return completed tasks
+    return JsonResponse({"completed_tasks": list(completed_tasks.values())}, safe=False)
