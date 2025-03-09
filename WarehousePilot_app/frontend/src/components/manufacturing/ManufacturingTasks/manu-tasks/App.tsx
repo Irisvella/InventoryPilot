@@ -4,6 +4,8 @@ import SideBar from "../../../dashboard_sidebar1/App";
 import type {Selection, SortDescriptor} from "@heroui/react";
 import type {ColumnsKey, ManufacturingTask} from "./data";
 import type {Key} from "@react-types/shared";
+import { Spinner } from "@heroui/spinner";
+
 
 import {
   Dropdown,
@@ -461,7 +463,9 @@ export default function ManuTasksTable() {
   }, [filterSelectedKeys, page, pages, filteredItems.length, onPreviousPage, onNextPage]);
 
   if (loading) {
-    return <div className="loading-container">Loading... This may take a minute</div>;
+    return <div className="loading-container">Loading... This may take a minute
+    <Spinner size="lg" color="default" className="ms-5"/>
+    </div>;
   }
 
   return (

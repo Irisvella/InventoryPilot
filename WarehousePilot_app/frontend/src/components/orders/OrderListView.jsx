@@ -26,6 +26,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import NavBar from "../navbar/App";
+import { Spinner } from "@heroui/spinner";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Extend dayjs with UTC and timezone
@@ -338,7 +339,9 @@ const OrderListView = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div>Loading...</div>
+          <div>Loading...
+          <Spinner size="lg" color="default" className="ms-5"/>
+          </div>
         </div>
       ) : (
         <>
