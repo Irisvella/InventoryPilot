@@ -255,8 +255,3 @@ def get_warehouse_throughput(request):
         # logger.debug(f"Final data count: {len(data)}")
         # return JsonResponse(data, safe=False)
     return JsonResponse({"message": "This is warehouse throughput backend"})
-
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        logger.error(traceback.format_exc())
-        return JsonResponse({"error": str(e), "traceback": traceback.format_exc()}, status=500)
