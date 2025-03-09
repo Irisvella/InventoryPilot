@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.db.models import Count
 from inventory.models import InventoryPicklistItem
 from django.db.models.functions import TruncDay
+from manufacturingLists.models import ManufacturingTask
 
 
 def order_picking_accuracy(request):
@@ -228,6 +229,32 @@ def order_fulfillment_rate(request):
 
         logger.debug(f"Final data count: {len(data)}")
         return JsonResponse(data, safe=False)
+
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return JsonResponse({"error": str(e), "traceback": traceback.format_exc()}, status=500)
+
+
+def get_warehouse_throughput(request):
+    """
+    API endpoint for warehouse throughput KPI.
+    Responds to GET request
+    Returns the total number of items picked and packed in the warehouse.
+    Checks how many items were in pick and pack
+    """
+
+    if request.method != 'GET':
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    # Get all manufacturing tasks with status 'completed'
+    # completed_tasks = ManufacturingTask.objects.filter(status="completed")
+
+    # Package data in JSON and send response
+
+        # logger.debug(f"Final data count: {len(data)}")
+        # return JsonResponse(data, safe=False)
+    return JsonResponse({"message": "This is warehouse throughput backend"})
 
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
