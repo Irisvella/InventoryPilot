@@ -96,7 +96,7 @@ def daily_picks_details(request):
 
 from django.http import JsonResponse
 from django.db.models import Count, Q
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
+from django.db.models.functions import TruncDay
 from orders.models import Orders, OrderPart
 from manufacturingLists.models import ManufacturingTask
 from inventory.models import Part
@@ -111,7 +111,7 @@ def order_fulfillment_rate(request):
     """
     API endpoint to get order fulfillment statistics filtered by date range.
     Supports filtering by 'day', 'week', or 'month'.
-    Allows users to specify a custom date for filtering.
+    Each day in the selected period is returned as a separate entry for daily charts.
     """
     if request.method != 'GET':
         return JsonResponse({"error": "Method not allowed"}, status=405)
@@ -119,112 +119,111 @@ def order_fulfillment_rate(request):
     try:
         logger.debug("Starting order_fulfillment_rate function")
 
-        # Get filter type (default: monthly)
+        # Get filter type (default: month) and reference date from query parameters
         filter_type = request.GET.get('filter', 'month').lower()
-        reference_date = request.GET.get('date', None)
+        reference_date_str = request.GET.get('date', None)
 
-        if reference_date:
+        if reference_date_str:
             try:
-                reference_date = datetime.strptime(reference_date, "%Y-%m-%d")
+                reference_date = datetime.strptime(reference_date_str, "%Y-%m-%d")
             except ValueError:
                 return JsonResponse({"error": "Invalid date format, expected YYYY-MM-DD"}, status=400)
         else:
             reference_date = datetime.now()
 
-        # Determine truncation function and period range
+        # Determine the overall period (start and end) based on filter type
         if filter_type == 'day':
-            trunc_function = TruncDay('start_timestamp')
-            period_start = reference_date.replace(hour=0, minute=0, second=0)
-            period_end = reference_date.replace(hour=23, minute=59, second=59)
-
+            period_start = reference_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            period_end = period_start + timedelta(days=1)
         elif filter_type == 'week':
-            trunc_function = TruncWeek('start_timestamp')
-            period_start = reference_date - timedelta(days=reference_date.weekday())  # Start of the week (Monday)
-            period_end = period_start + timedelta(days=6, hours=23, minutes=59, seconds=59)  # End of the week (Sunday)
+            # Start on Monday
+            period_start = reference_date - timedelta(days=reference_date.weekday())
+            period_start = period_start.replace(hour=0, minute=0, second=0, microsecond=0)
+            period_end = period_start + timedelta(days=7)
+        else:  # Default to month
+            period_start = reference_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            period_end = period_start + relativedelta(months=1)
 
-        else:  # Default to 'month'
-            trunc_function = TruncMonth('start_timestamp')
-            period_start = reference_date.replace(day=1, hour=0, minute=0, second=0)
-            period_end = period_start + relativedelta(months=1, seconds=-1)  # Last second of the month
+        logger.debug(f"Filtering orders from {period_start} to {period_end} for filter '{filter_type}'")
 
-        logger.debug(f"Filtering orders from {period_start} to {period_end}")
-
-        # Get orders started in the selected period
+        # Aggregate orders by day within the period
         orders_qs = (
             Orders.objects
-            .filter(start_timestamp__gte=period_start, start_timestamp__lte=period_end)
-            .annotate(period=trunc_function)
-            .values('period')
-            .annotate(total_orders_started=Count('order_id'))  # Renamed from total_orders
-            .order_by('period')
+            .filter(start_timestamp__gte=period_start, start_timestamp__lt=period_end)
+            .annotate(day=TruncDay('start_timestamp'))
+            .values('day')
+            .annotate(total_orders_started=Count('order_id'))
+            .order_by('day')
         )
 
-        logger.debug(f"Orders query returned {len(orders_qs)} periods")
+        # Create a lookup dictionary keyed by the day (date object)
+        aggregated_data = { entry['day'].date(): entry for entry in orders_qs }
 
         data = []
-        for entry in orders_qs:
-            period_date = entry['period']
-            if not period_date:
-                continue  # Skip invalid periods
+        current_day = period_start.date()
+        end_day = period_end.date()
 
-            # Orders within this period
-            period_orders = Orders.objects.filter(start_timestamp__gte=period_date, start_timestamp__lt=period_end)
-            order_ids = list(period_orders.values_list('order_id', flat=True))
-            
-            # Get orders_started without exclusions
-            orders_started = period_orders.count()
-            
-            # Get ALL orders in the system for total count (regardless of period)
+        # Loop through each day in the period
+        while current_day < end_day:
+            day_start = datetime.combine(current_day, datetime.min.time())
+            day_end = day_start + timedelta(days=1)
+
+            # Get orders for this specific day
+            day_orders = Orders.objects.filter(start_timestamp__gte=day_start, start_timestamp__lt=day_end)
+            order_ids = list(day_orders.values_list('order_id', flat=True))
+            orders_started = day_orders.count()
             total_orders_count = Orders.objects.count()
 
             if not order_ids:
                 data.append({
-                    "period": period_date.strftime("%Y-%m-%d"),
-                    "total_orders_started": entry['total_orders_started'],  # Renamed from total_orders
+                    "period": day_start.strftime("%Y-%m-%d"),
+                    "total_orders_started": aggregated_data.get(current_day, {}).get('total_orders_started', 0),
                     "total_orders_count": total_orders_count,
-                    "orders_started": orders_started,  # Now without exclusions
+                    "orders_started": 0,
                     "partially_fulfilled": 0,
                     "fully_fulfilled": 0,
                 })
+                current_day += timedelta(days=1)
                 continue
 
-            # Get parts associated with these orders through OrderPart
+            # Get parts associated with these orders
             parts = Part.objects.filter(orderpart__order_id__in=order_ids)
             part_skus = list(parts.values_list('sku_color', flat=True))
-
             if not part_skus:
                 data.append({
-                    "period": period_date.strftime("%Y-%m-%d"),
-                    "total_orders_started": entry['total_orders_started'],  # Renamed from total_orders
+                    "period": day_start.strftime("%Y-%m-%d"),
+                    "total_orders_started": aggregated_data.get(current_day, {}).get('total_orders_started', orders_started),
                     "total_orders_count": total_orders_count,
-                    "orders_started": orders_started,  # Now without exclusions
+                    "orders_started": orders_started,
                     "partially_fulfilled": 0,
                     "fully_fulfilled": 0,
                 })
+                current_day += timedelta(days=1)
                 continue
 
-            # Count partially fulfilled orders (Orders that have at least one ManufacturingTask in progress)
+            # Count partially fulfilled orders (orders with at least one ManufacturingTask in progress)
             partially_fulfilled_orders = OrderPart.objects.filter(
                 order_id__in=order_ids,
                 sku_color__manufacturingtask__status__in=["nesting", "bending", "cutting", "welding", "painting"]
             ).values('order_id').distinct().count()
 
-            # Count fully fulfilled orders (Orders where all ManufacturingTasks are completed)
+            # Count fully fulfilled orders (orders where all ManufacturingTasks are completed)
             fully_fulfilled_orders = OrderPart.objects.filter(
                 order_id__in=order_ids,
                 sku_color__manufacturingtask__status="completed"
             ).values('order_id').distinct().count()
 
             data.append({
-                "period": period_date.strftime("%Y-%m-%d"),
-                "total_orders_started": entry['total_orders_started'],  # Renamed from total_orders
+                "period": day_start.strftime("%Y-%m-%d"),
+                "total_orders_started": aggregated_data.get(current_day, {}).get('total_orders_started', orders_started),
                 "total_orders_count": total_orders_count,
-                "orders_started": orders_started,  # Now without exclusions
+                "orders_started": orders_started,
                 "partially_fulfilled": partially_fulfilled_orders,
                 "fully_fulfilled": fully_fulfilled_orders,
             })
 
-            logger.debug(f"Added data entry for {period_date}")
+            logger.debug(f"Added data entry for {current_day}")
+            current_day += timedelta(days=1)
 
         logger.debug(f"Final data count: {len(data)}")
         return JsonResponse(data, safe=False)
