@@ -13,6 +13,25 @@ function ChangePassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false
+  });
+
+  const validatePassword = (password) => {
+    const requirements = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*()\-_=+[\]{}|;:,.<>?]/.test(password)
+    };
+    setPasswordRequirements(requirements);
+    return Object.values(requirements).every(Boolean);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,6 +51,12 @@ function ChangePassword() {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+
+    if (!validatePassword(newPassword)) {
+      setError('Password does not meet requirements.');
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setError('New passwords do not match.');
       return;
@@ -110,11 +135,34 @@ function ChangePassword() {
                 type="password"
                 id="new-password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => { 
+                  setNewPassword(e.target.value);
+                  validatePassword(e.target.value);
+                }}
                 required
                 placeholder="Enter new password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
+              <div className="text-sm text-gray-600">
+                <p>Password must contain: </p>
+                <ul className="list-disc pl-5">  
+                  <li className={passwordRequirements.length ? 'text-green-500' : 'text-gray-400'}>
+                    At least 8 characters long
+                  </li>
+                  <li className={passwordRequirements.uppercase ? 'text-green-500' : 'text-gray-400'}>
+                    At least one uppercase letter (A-Z)
+                  </li> 
+                  <li className={passwordRequirements.lowercase ? 'text-green-500' : 'text-gray-400'}>
+                    At least one lowercase letter (a-z) 
+                  </li>
+                  <li className={passwordRequirements.number ? 'text-green-500' : 'text-gray-400'}>
+                    At least one number (0-9)
+                  </li>
+                  <li className={passwordRequirements.special ? 'text-green-500' : 'text-gray-400'}>
+                    At least one special character (!@#$%^&*()_-+=[]{}|;:,.?)
+                  </li>
+                </ul>
+              </div>
             </div>
 
             {/* Confirm New Password */}

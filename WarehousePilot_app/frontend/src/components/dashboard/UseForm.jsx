@@ -6,6 +6,31 @@ import Modal from "./Modal";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const generatePassword = () => {
+  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+  const symbols = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+  const allChars = lowercase + uppercase + numbers + symbols;
+  
+  const length = Math.floor(Math.random() * 9) + 8; // 8-16 characters
+  const array = new Uint32Array(length);
+  window.crypto.getRandomValues(array);
+  
+  let password = [
+    lowercase[array[0] % lowercase.length],
+    uppercase[array[1] % uppercase.length],
+    numbers[array[2] % numbers.length],
+    symbols[array[3] % symbols.length]
+  ];
+  
+  for (let i = 4; i < length; i++) {
+    password.push(allChars[array[i] % allChars.length]);
+  }
+  
+  return password.sort(() => Math.random() - 0.5).join('');
+};
+
 export default function UserForm() {
   const [username, setUsername] = useState("");
   const [first_name, setFirstName] = useState("");
@@ -23,6 +48,10 @@ export default function UserForm() {
   const navigate = useNavigate();
   const { user_id } = useParams();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const handleGeneratePassword = () => {
+    setPassword(generatePassword());
+  };
 
   const typesOfUsers = ["Admin", "Manager", "Staff", "QA"];
   const today = new Date();
@@ -180,12 +209,30 @@ export default function UserForm() {
               <InputField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
               <InputField label="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               {!isEditMode && (
-                <InputField
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                   <InputField
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-7 text-sm text-black hover:text-gray-700"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                  <div className="mt-1 flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={handleGeneratePassword}
+                      className="text-sm text-black hover:text-gray-700"
+                    >
+                      Generate Password
+                    </button>
+                  </div>
+                </div>
               )}
               <InputField label="Date Of Hire" type="date" value={date_of_hire} onChange={(e) => setDateOfHire(e.target.value)} minValue={today}/>
               <InputField label="Department" value={department} onChange={(e) => setDepartment(e.target.value)} />

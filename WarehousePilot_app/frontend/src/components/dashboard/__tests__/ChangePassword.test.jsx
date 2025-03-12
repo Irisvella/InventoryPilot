@@ -110,4 +110,25 @@ describe('ChangePassword Component', () => {
       expect(screen.getByText(/error changing password/i)).toBeInTheDocument();
     });
   });
+  test('Rejects passwords without mix of character types', async () => {
+    const { getByText, getByLabelText } = render(<ChangePassword />);
+    const newPasswordInput = getByLabelText('New Password');
+    fireEvent.change(newPasswordInput, { target: { value: 'onlylowercase' } });
+    const confirmPasswordInput = getByLabelText('Confirm New Password');
+    fireEvent.change(confirmPasswordInput, { target: { value: 'onlylowercase' } });
+    const submitButton = getByText('Change Password');
+    fireEvent.click(submitButton);
+    expect(getByText('Password does not meet requirements')).toBeInTheDocument();
+  });
+
+  test('Accepts valid passwords meeting all requirements', async () => {
+    const { getByText, getByLabelText } = render(<ChangePassword />);
+    const newPasswordInput = getByLabelText('New Password');
+    fireEvent.change(newPasswordInput, { target: { value: 'P@ssw0rd!' } });
+    const confirmPasswordInput = getByLabelText('Confirm New Password');
+    fireEvent.change(confirmPasswordInput, { target: { value: 'P@ssw0rd!' } });
+    const submitButton = getByText('Change Password');
+    fireEvent.click(submitButton);
+    expect(getByText('Password does not meet requirements')).not.toBeInTheDocument();
+  });
 });
