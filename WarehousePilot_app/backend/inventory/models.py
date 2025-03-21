@@ -20,6 +20,7 @@ class Inventory(models.Model):
 class InventoryPicklist(models.Model):
     picklist_id = models.AutoField(primary_key=True)
     order_id = models.ForeignKey(Orders, on_delete=models.CASCADE)
+    warehouse_nb = models.CharField(max_length=255, null=True) # its going to be 499 for inventory picking and 429 for prod 
     assigned_employee_id = models.ForeignKey(users, null=True, on_delete=models.SET_NULL)
     status = models.BooleanField()
     picklist_complete_timestamp = models.DateTimeField(null=True, blank=True, default=None) # when the picklist has been fully picked
@@ -37,6 +38,10 @@ class InventoryPicklistItem(models.Model):
       status = models.BooleanField() # True if picked, False if not picked
       item_picked_timestamp = models.DateTimeField(null=True, blank=True, default=None) # when the item has been picked
       picked_at = models.DateTimeField(null=True, blank=True)
+      area = models.CharField(max_length=255, null=True) # area type, like dairy, meat, produce, etc
+      lineup_nb = models.CharField(max_length=255, null=True) # lineup number like 01, 02, etc
+      model_nb = models.CharField(max_length=255, null=True) # model number like 8-12, 13-15 
+      material_type = models.CharField(max_length=255, null=True) # material type (metal and plastic). All metals must be picked before plastics 
 
 def __str__(self):
         return f"Picklist Item {self.picklist_item_id} - Status: {self.status}"
