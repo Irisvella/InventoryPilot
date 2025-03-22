@@ -91,7 +91,8 @@ def daily_picks_details(request):
         return JsonResponse(data, safe=False)
 
     else:
-        return JsonResponse({"error": "Method not allowed"}, status=405)    
+        return JsonResponse({"error": "Method not allowed"}, status=405)   
+     
 
 
 from django.http import JsonResponse
@@ -306,3 +307,54 @@ class CompletedOrdersView(APIView):
         except Exception as e:
             logger.error(f"Failed to fetch completed orders data: {str(e)}")
             return Response({"error": str(e)}, status=500)
+        
+class ActiveOrdersDetailsView(APIView):
+    
+
+    def get(self, request):
+        try:
+            end_date = timezone.now().date()
+            start_date = end_date - timedelta(days=30)
+
+            # Fetch active orders with detailed information
+            active_orders = (
+                InventoryPicklist.objects
+                .filter(
+                    status=False,
+                    order_id__status="In Progress",
+                    order_id__start_timestamp__date__gte=start_date,
+                    order_id__start_timestamp__date__lte=end_date
+                )
+                .select_related('order_id', 'assigned_employee_id')
+                .prefetch_related('inventorypicklistitem_set')
+                .annotate(date=TruncDate('order_id__start_timestamp'))
+            )
+
+            # Prepare detailed response
+            response_data = []
+            for picklist in active_orders:
+                items = picklist.inventorypicklistitem_set.all()
+                response_data.append({
+                    "order_id": picklist.order_id.order_id,
+                    "start_date": picklist.order_id.start_timestamp.strftime('%Y-%m-%d'),
+                    "due_date": picklist.order_id.due_date.strftime('%Y-%m-%d') if picklist.order_id.due_date else None,
+                    "assigned_employee": (
+                        f"{picklist.assigned_employee_id.first_name} {picklist.assigned_employee_id.last_name}"
+                        if picklist.assigned_employee_id else "Unassigned"
+                    ),
+                    "items": [
+                        {
+                            "sku_color": item.sku_color.sku_color,
+                            "quantity": item.amount,
+                            "location": item.location.location if item.location else "N/A",
+                            "status": "Picked" if item.status else "Pending"
+                        }
+                        for item in items
+                    ]
+                })
+
+            logger.info("Successfully fetched detailed active orders data")
+            return Response(response_data, status=200)
+        except Exception as e:
+            logger.error(f"Failed to fetch active orders details: {str(e)}")
+            return Response({"error": str(e)}, status=500)        

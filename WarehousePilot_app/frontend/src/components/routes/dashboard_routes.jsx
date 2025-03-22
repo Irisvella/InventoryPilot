@@ -18,6 +18,7 @@ import ManuTasksTable from '../manufacturing/ManufacturingTasks/manu-tasks/App';
 import QAErrorListView from '../orders/QAErrorListview';
 import CTPOTable from '../kpis/CTPO/CTPO_main';
 import OrderPickingPage from "../dashboard/OrderPickingPage";
+import ActiveOrdersDetails from "../dashboard/ActiveOrdersDetails";
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
@@ -54,7 +55,8 @@ export const dashboard_routes = [
   { path: '/qa_error_list_view', element: <ProtectedRoute element={<QAErrorListView />} /> },
   {path: '/CTPO', element: <ProtectedRoute element={<CTPOTable />} />},
   {path:"/order-picking", element: <ProtectedRoute element={<OrderPickingPage />} />},
-  {path:"/order-fullfillement-dashboard", element: <ProtectedRoute element={<OrderFulfillmentDashboard />} />}
+  {path:"/order-fullfillement-dashboard", element: <ProtectedRoute element={<OrderFulfillmentDashboard />} />},
+  { path: "/active-orders-details", element: <ProtectedRoute element={<ActiveOrdersDetails />} /> },
   
 ];
 

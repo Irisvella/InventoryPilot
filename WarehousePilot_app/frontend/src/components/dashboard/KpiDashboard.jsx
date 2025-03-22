@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 // import Header from "../dashboard_sidebar/Header";
 import CycleTime from "./CycleTime";
 import OrderPickingAccuracy from "./OrderPickingAccuracy";
@@ -21,6 +22,7 @@ const KPIDashboard = ({ userData }) => {
   const [totalCompletedOrders, setTotalCompletedOrders] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -53,6 +55,11 @@ const KPIDashboard = ({ userData }) => {
     fetchData();
   }, []);
 
+  // Function to handle navigation to details page
+  const handleViewDetails = () => {
+    navigate('/active-orders-details');
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -68,7 +75,15 @@ const KPIDashboard = ({ userData }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {/* Individual metric cards */}
             <div className="bg-white p-4 shadow rounded-lg">
-              <h2 className="text-xl font-semibold">Active Orders</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Active Orders</h2>
+                <button
+                  onClick={handleViewDetails}
+                  className="bg-gray-500 hover:bg-red-600 text-white py-1 px-3 rounded"
+                >
+                  View Details
+                </button>
+              </div>
               {loading ? (
                 <p className="text-center">Loading...</p>
               ) : error ? (
@@ -77,7 +92,6 @@ const KPIDashboard = ({ userData }) => {
                 <div className="flex flex-col">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-3xl font-bold">{totalActiveOrders.toLocaleString()}</p>
-  
                   </div>
                   <div>
                     <LineChart width={300} height={150} data={activeOrdersData}>
@@ -120,7 +134,6 @@ const KPIDashboard = ({ userData }) => {
               <div className="accuracy-metrics">
                 <OrderPickingAccuracy />
               </div>
-
             </div>
             {/* <div className="bg-white p-4 shadow rounded-lg">
               <h2 className="text-xl font-semibold">Sessions</h2>
