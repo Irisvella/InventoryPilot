@@ -57,7 +57,7 @@ return [
       {
         key: "qa_error_reports",
         href: "/qa_error_list_view",
-        icon: "heroicons-outline:exclamation-circle", // ⚠️ New Exclamation Circle Icon
+        icon: "heroicons-outline:exclamation-circle", 
         title: "QA Error Reports",
       },
     ]
@@ -84,7 +84,13 @@ return [
   title: "Account Management",
 }
 ,
-
+...(userRole === 'admin' || userRole === 'manager' ? [{
+  key: "logging",
+  href: "/logging",
+  icon: "mdi:file-document-multiple-outline",
+  title: "Logging",
+}] : [])
+,
 ];
 
 }
