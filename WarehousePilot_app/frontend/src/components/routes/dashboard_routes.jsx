@@ -19,6 +19,7 @@ import QAErrorListView from '../orders/QAErrorListview';
 import CTPOTable from '../kpis/CTPO/CTPO_main';
 import OrderPickingPage from "../dashboard/OrderPickingPage";
 import ActiveOrdersDetails from "../dashboard/ActiveOrdersDetails";
+import InventoryPickingLogs from "../Inventory_Picking_Logs/InventoryPickingLogs";
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
@@ -57,6 +58,6 @@ export const dashboard_routes = [
   {path:"/order-picking", element: <ProtectedRoute element={<OrderPickingPage />} />},
   {path:"/order-fullfillement-dashboard", element: <ProtectedRoute element={<OrderFulfillmentDashboard />} />},
   { path: "/active-orders-details", element: <ProtectedRoute element={<ActiveOrdersDetails />} /> },
-  
+  { path: "/inventory-picking-logs", element: <ProtectedRoute element={<InventoryPickingLogs />} /> },
 ];
 
