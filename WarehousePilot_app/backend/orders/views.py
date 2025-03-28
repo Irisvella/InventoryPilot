@@ -473,3 +473,88 @@ class DelayedOrders(APIView):
         except Exception as e:
             logger.error("Failed to fetch delayed orders (DelayedOrders)")
             return Response({"error": str(e)}, status=500)
+
+
+class CycleTimePerOrderPreview(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            past_month = (datetime.now() - timedelta(days=30)).date()  # Get the date from 30 days ago
+            today = datetime.now().date()  # Current date
+
+            # Query to get the timestamps from each order
+            fetched_orders = Orders.objects.filter(start_timestamp__isnull=False).values(
+                'order_id', 'start_timestamp'
+            )
+            orders = []
+
+            # Calculate cycle time for each order
+            for order in fetched_orders:
+                id = order['order_id']
+                try:
+                    picklist_completion = InventoryPicklist.objects.filter(order_id=id).values(
+                        'picklist_complete_timestamp'
+                    ).first()
+                    pack_completion = Orders.objects.filter(order_id=id).values('end_timestamp').first()
+                    ship_completion = Orders.objects.filter(order_id=id).values('ship_date').first()
+
+                    if not picklist_completion or not picklist_completion['picklist_complete_timestamp']:
+                        continue  # Skip orders that haven't been picked
+
+                    picking_duration = abs(
+                        (picklist_completion['picklist_complete_timestamp'].date() - order['start_timestamp'].date()).days
+                    )
+                    packing_duration = (
+                        abs(
+                            (pack_completion['end_timestamp'].date() - picklist_completion['picklist_complete_timestamp'].date()).days
+                        )
+                        if pack_completion and pack_completion['end_timestamp']
+                        else 0
+                    )
+                    shipping_duration = (
+                        abs(
+                            (ship_completion['ship_date'] - pack_completion['end_timestamp'].date()).days
+                        )
+                        if ship_completion and ship_completion['ship_date']
+                        else 0
+                    )
+
+                    cycle_time = picking_duration + packing_duration + shipping_duration
+                    completion_date = (
+                        ship_completion['ship_date']
+                        if ship_completion and ship_completion['ship_date']
+                        else picklist_completion['picklist_complete_timestamp'].date()
+                    )
+
+                    # Only include orders completed in the past month
+                    if past_month <= completion_date <= today:
+                        orders.append({"date": completion_date, "cycle_time": cycle_time})
+
+                except Exception as e:
+                    logger.warning(f"Error processing order {id}: {e}")
+                    continue
+
+            # Group orders by day
+            daily_data = defaultdict(list)
+            for order in orders:
+                daily_data[order["date"]].append(order["cycle_time"])
+
+            # Calculate average cycle time for each day
+            daily_avg = [
+                {"date": day, "avg_cycle_time": sum(times) / len(times)}
+                for day, times in daily_data.items()
+            ]
+
+            # Sort results by date
+            daily_avg.sort(key=lambda x: x["date"])
+
+            # Return the response
+            logger.info("Successfully calculated average cycle time per day for the past month")
+            return Response(daily_avg, status=200)
+
+        except Exception as e:
+            logger.error("Failed to calculate average cycle time per day (CycleTimePerOrderView)")
+            return Response({"error": str(e)}, status=500)
+

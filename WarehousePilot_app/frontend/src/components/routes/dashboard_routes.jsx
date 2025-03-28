@@ -1,11 +1,11 @@
-import { Dashboard, ManagerDashboard, AdminDashboard, AccountManagement, ChangePassword, Profile, StaffDashboard, QADashboard  } from '../dashboard';
+import { Dashboard, ManagerDashboard, AdminDashboard, AccountManagement, ChangePassword, Profile, StaffDashboard, QADashboard } from '../dashboard';
 import KpiDashboard from "../dashboard/KpiDashboard"
-import InventoryTable from '../inventory-stock/App'; 
+import InventoryTable from '../inventory-stock/App';
 import ManageUsersPage from '../admin_manage_users/ManageUsersPage';
 import AddUsersDashboard from '../dashboard/AddUsersDashboard';
 import NotifCard from '../notifications/notifications-card/App';
 import NavBar from '../navbar/App';
-import OrderListView from '../orders/OrderListView'; 
+import OrderListView from '../orders/OrderListView';
 import ManageUsersTable from '../admin_manage_users/manage_users_table/App';
 import InventoyPickList from '../orders/InventoyPickList';
 import AssignedPickList from '../orders/AssignedPickList';
@@ -24,6 +24,7 @@ import InventoryPickingLogs from "../Inventory_Picking_Logs/InventoryPickingLogs
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import OrderFulfillmentDashboard from '../kpis/OrderFulfillmentDashboard ';
+import ThroughputThresholdDashboard from '../kpis/throughput-threshold/throughtput-threshold-dashboard';
 
 const ProtectedRoute = ({ element }) => {
   const isLoggedIn = !!localStorage.getItem('token');
@@ -32,8 +33,8 @@ const ProtectedRoute = ({ element }) => {
 
 export const dashboard_routes = [
   { path: '/dashboard', element: <ProtectedRoute element={<Dashboard />} /> },
-  { path: '/manager_dashboard', element:  <ProtectedRoute element={<ManagerDashboard />} /> },
-  { path: '/admin_dashboard', element:  <ProtectedRoute element={<AdminDashboard />} /> },
+  { path: '/manager_dashboard', element: <ProtectedRoute element={<ManagerDashboard />} /> },
+  { path: '/admin_dashboard', element: <ProtectedRoute element={<AdminDashboard />} /> },
   { path: '/admin_dashboard/manage_users', element: <ProtectedRoute element={<ManageUsersTable />} /> },
   { path: '/account_management', element: <ProtectedRoute element={<AccountManagement />} /> },
   { path: '/profile', element: <ProtectedRoute element={<Profile />} /> },
@@ -51,13 +52,15 @@ export const dashboard_routes = [
   { path: '/qa_dashboard', element: <ProtectedRoute element={<QADashboard />} /> },
   { path: '/manufacturing_list_item/:order_id', element: <ProtectedRoute element={<ManufacturingListItem />} /> },
   { path: '/qa_tasks', element: <ProtectedRoute element={<QATasks />} /> },
-  { path: '/staff_manufacturing_tasks', element: <ProtectedRoute element={<StaffManufacturingTasks />} /> }, 
+  { path: '/staff_manufacturing_tasks', element: <ProtectedRoute element={<StaffManufacturingTasks />} /> },
   { path: '/manufacturing_tasks', element: <ProtectedRoute element={<ManuTasksTable />} /> },
   { path: '/qa_error_list_view', element: <ProtectedRoute element={<QAErrorListView />} /> },
-  {path: '/CTPO', element: <ProtectedRoute element={<CTPOTable />} />},
-  {path:"/order-picking", element: <ProtectedRoute element={<OrderPickingPage />} />},
-  {path:"/order-fullfillement-dashboard", element: <ProtectedRoute element={<OrderFulfillmentDashboard />} />},
+  { path: '/CTPO', element: <ProtectedRoute element={<CTPOTable />} /> },
+  { path: '/throughput-threshold', element: <ProtectedRoute element={<ThroughputThresholdDashboard />} /> },
+  { path: "/order-picking", element: <ProtectedRoute element={<OrderPickingPage />} /> },
+  { path: "/order-fullfillement-dashboard", element: <ProtectedRoute element={<OrderFulfillmentDashboard />} /> },
   { path: "/active-orders-details", element: <ProtectedRoute element={<ActiveOrdersDetails />} /> },
   { path: "/inventory-picking-logs", element: <ProtectedRoute element={<InventoryPickingLogs />} /> },
+
 ];
 

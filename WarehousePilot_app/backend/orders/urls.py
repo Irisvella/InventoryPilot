@@ -2,7 +2,7 @@ from django.urls import path
 from .views import GenerateInventoryAndManufacturingListsView
 
 from . import views
-from .views import OrdersView, StartOrderView, InventoryPicklistView, InventoryPicklistItemsView, CycleTimePerOrderView, DelayedOrders
+from .views import OrdersView, StartOrderView, InventoryPicklistView, InventoryPicklistItemsView, CycleTimePerOrderView, DelayedOrders, CycleTimePerOrderPreview
 
 
 urlpatterns = [
@@ -13,4 +13,5 @@ urlpatterns = [
     path('inventory_picklist_items/<int:order_id>/', InventoryPicklistItemsView.as_view(), name='inventory_picklist_items'),
     path('cycle_time_per_order/', CycleTimePerOrderView.as_view(), name='cycle_time_per_order'),
     path('delayed_orders/', DelayedOrders.as_view(), name='delayed_orders'),
+    path('ctpo_preview/', CycleTimePerOrderPreview.as_view(), name='ctpo_preview'),
 ]

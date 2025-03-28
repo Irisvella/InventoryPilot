@@ -323,6 +323,7 @@ export default function InventoryTable() {
               value={filterValue}
               onValueChange={onSearchChange}
             />
+            <Tooltip content="Sort in Ascending or Descending order">
             <div>
               <Dropdown>
                 <DropdownTrigger>
@@ -351,6 +352,8 @@ export default function InventoryTable() {
                 </DropdownMenu>
               </Dropdown>
             </div>
+            </Tooltip>
+            <Tooltip content="Add or remove columns">
             <div>
               <Dropdown closeOnSelect={false}>
                 <DropdownTrigger>
@@ -380,6 +383,7 @@ export default function InventoryTable() {
                 </DropdownMenu>
               </Dropdown>
             </div>
+            </Tooltip>
           </div>
 
           <Divider className="h-5" orientation="vertical" />
@@ -432,9 +436,11 @@ export default function InventoryTable() {
           <h1 className="text-2xl font-[700] leading-[32px]">
             <b>Inventory</b>
           </h1>
+          <Tooltip content="Total number of items in inventory">
           <Chip className="hidden items-center text-default-500 sm:flex" size="sm" variant="flat">
             {inventory.length}
           </Chip>
+          </Tooltip>
         </div>
         <div className="flex items-center gap-6">
           <Popover>

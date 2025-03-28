@@ -7,11 +7,13 @@ import OrderPickingAccuracy from "./OrderPickingAccuracy";
 import WarehouseThroughput from "./WarehouseThroughput";
 // import OrderFulfillmentRate from "./OrderFulfillmentRate";
 // import StockLevelsPreview from "./StockLevelsPreview";
+import ThroughputThresholdKpiPreview from "../kpis/throughput-threshold/throughput-threshold-kpi-preview"
 import OrderFulfillmentPreview from "../kpis/OrderFulfillmentPreview"
 import SideBar from "../dashboard_sidebar1/App";
 import NavBar from "../navbar/App";
 import axios from "axios";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import CTPOPreview from "../kpis/CTPO/CTPOPreview";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -150,9 +152,8 @@ const KPIDashboard = ({ userData }) => {
 
             {/* Left graph */}
             <div className="bg-white p-4 shadow rounded-lg flex flex-col h-full">
-              <h2 className="text-xl font-semibold">Warehouse Throughput Graph</h2>
-              {/* Placeholder for graph */}
-              <div className="h-64 bg-gray-200 flex items-center justify-center"></div>
+
+              <ThroughputThresholdKpiPreview/>
             </div>
 
             {/* Right graph */}
@@ -161,6 +162,16 @@ const KPIDashboard = ({ userData }) => {
               <OrderFulfillmentPreview/>
             </div>
           </div>
+
+          {/* Graph Section */}
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {/* CTPO graph */}
+            <div className="bg-white p-4 shadow rounded-lg flex flex-col h-full">
+              <CTPOPreview />
+              {/* Placeholder for graph */}
+            </div>
+          </div>         
 
           {/* Details Section */}
           <div className="mt-6 bg-white p-4 shadow rounded-lg">
