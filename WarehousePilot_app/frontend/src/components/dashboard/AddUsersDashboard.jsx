@@ -12,7 +12,7 @@ const AddUsersDashboard = ({ userData }) => {
   };
 
   return (
-    <div>
+    <div className="dark:bg-gray-900 min-h-screen">
       {/* Sidebar */}
       <SideBar />
 
@@ -22,7 +22,7 @@ const AddUsersDashboard = ({ userData }) => {
         {/* <Header userData={userData} toggleSidebar={toggleSidebar} /> */}
 
         {/* KPI Dashboard Content */}
-        <main className="p-6 h-screen my-6">
+        <main className="p-6 h-screen my-6 dark:bg-gray-900">
          
 
           

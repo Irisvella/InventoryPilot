@@ -131,14 +131,14 @@ const QAErrorListView = () => {
   const totalPages = Math.ceil(filteredErrors.length / rowsPerPage);
 
   return (
-    <div style={{ marginTop: "-80px" }}>
+    <div style={{ marginTop: "-80px" }} className="dark:bg-gray-900 min-h-screen">
     <NavBar />
     <SideBar /> {/* Add the SideBar component here */}
     <div className="flex-1 p-6" style={{ padding: "40px" }}>
       <div className="flex-1">
         <div className="mt-8 p-8">
           <div className="flex flex-col gap-6">
-            <h1 className="text-xl font-bold">QA Error Reports</h1>
+            <h1 className="text-xl font-bold dark:text-white">QA Error Reports</h1>
 
             {errorMsg && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -225,17 +225,16 @@ const QAErrorListView = () => {
                   <span>
                     Page {page} of {totalPages}
                   </span>
-                  <Pagination
-                    total={totalPages}
-                    page={page}
-                    initialPage={1}
-                    onChange={(newPage) => setPage(newPage)}
-                    color="default"
-                    classNames={{
-                      item: "bg-white text-black",
-                      cursor: "bg-black text-white",
-                    }}
-                  />
+                   <Pagination
+                                      total={totalPages}
+                                      initialPage={1}
+                                      current={page}
+                                      onChange={(newPage) => setPage(newPage)}
+                                      classNames={{
+                                        item: "bg-white text-black dark:bg-gray-700 dark:text-white",
+                                        cursor: "bg-black text-white dark:bg-blue-600 dark:text-white",
+                                      }}
+                                    />
                 </div>
               </>
             )}

@@ -41,8 +41,8 @@ export default function ThroughputDonutChart({ data }) {
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">This Week's Throughput Threshold</h2>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4 dark:text-white">This Week's Throughput Threshold</h2>
             <ResponsiveContainer width="100%" height={310}>
                 <PieChart>
                     <Pie
@@ -60,8 +60,21 @@ export default function ThroughputDonutChart({ data }) {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend verticalAlign="bottom" align="center" />
+                    <Tooltip 
+                        content={<CustomTooltip />}
+                        contentStyle={{
+                            backgroundColor: '#1F2937',
+                            borderColor: '#374151',
+                            color: '#F3F4F6'
+                        }}
+                    />
+                    <Legend 
+                        verticalAlign="bottom" 
+                        align="center" 
+                        wrapperStyle={{
+                            color: '#F3F4F6'
+                        }}
+                    />
                 </PieChart>
             </ResponsiveContainer>
         </div>

@@ -181,24 +181,26 @@ export default function UserForm() {
   };
   
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+    <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8 dark:text-white">
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="max-w-60 lg:w-1/3 p-4 md:p-6 border-2 border-grey-500/50 rounded-lg">
+        {/* Profile Picture Section */}
+        <div className="max-w-60 lg:w-1/3 p-4 md:p-6 border-2 border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800">
           <div className="flex flex-col items-center justify-center space-y-4">
             <UserCircleIcon className="text-gray-300 md:size-32" aria-hidden="true" />
-            <label htmlFor="photo" className="block text-sm font-medium text-gray-900">
+            <label htmlFor="photo" className="block text-sm font-medium text-gray-900 dark:text-gray-300">
               Profile Picture
             </label>
           </div>
         </div>
 
-        <div className="w-full lg:w-2/3 p-4 md:p-6 border-2 border-grey-500/50 rounded-lg">
+        {/* Form Fields Section */}
+        <div className="w-full lg:w-2/3 p-4 md:p-6 border-2 border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-800">
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 {isEditMode ? "Edit user" : "Add new user"}
               </h2>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 Enter the staff member's information below
               </p>
             </div>
@@ -208,9 +210,10 @@ export default function UserForm() {
               <InputField label="Last name" value={last_name} onChange={(e) => setLastName(e.target.value)} />
               <InputField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
               <InputField label="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              
               {!isEditMode && (
                 <div className="relative">
-                   <InputField
+                  <InputField
                     label="Password"
                     type={showPassword ? "text" : "password"}
                     value={password}
@@ -219,7 +222,7 @@ export default function UserForm() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-7 text-sm text-black hover:text-gray-700"
+                    className="absolute right-2 top-7 text-sm text-black dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -227,13 +230,14 @@ export default function UserForm() {
                     <button
                       type="button"
                       onClick={handleGeneratePassword}
-                      className="text-sm text-black hover:text-gray-700"
+                      className="text-sm text-black dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-400"
                     >
                       Generate Password
                     </button>
                   </div>
                 </div>
               )}
+              
               <InputField label="Date Of Hire" type="date" value={date_of_hire} onChange={(e) => setDateOfHire(e.target.value)} minValue={today}/>
               <InputField label="Department" value={department} onChange={(e) => setDepartment(e.target.value)} />
               <Dropdown label="Role" options={typesOfUsers} value={role} required={true} onChange={(e) => setRole(e.target.value)} />
@@ -242,18 +246,18 @@ export default function UserForm() {
             <div className="mt-6">
               <button
                 type="submit"
-                className="w-full md:w-auto rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 transition-colors"
+                className="w-full md:w-auto rounded-md bg-black dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 dark:hover:bg-gray-600 transition-colors"
               >
                 {isEditMode ? "Update Staff" : "Add Staff"}
               </button>
 
-                <Modal
-                  show={showModal}
-                  onClose={() => setShowModal(false)}
-                  header={header}
-                  body={feedback}
-                  LinkTo={LinkToPage}
-                />
+              <Modal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                header={header}
+                body={feedback}
+                LinkTo={LinkToPage}
+              />
             </div>
           </div>
         </div>
@@ -262,10 +266,10 @@ export default function UserForm() {
   );
 }
 
-function InputField({ label, type = "text", value, onChange }) {
+function InputField({ label, type = "text", value, onChange, minValue }) {
   return (
     <div>
-      <label htmlFor={label.toLowerCase().replace(" ", "-")} className="block text-sm font-medium text-gray-900 mb-1">
+      <label htmlFor={label.toLowerCase().replace(" ", "-")} className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-1">
         {label}
       </label>
       <input
@@ -274,7 +278,8 @@ function InputField({ label, type = "text", value, onChange }) {
         placeholder={`Enter ${label}`}
         value={value}
         onChange={onChange}
-        className="block w-full rounded-md outline outline-1 -outline-offset-1 outline-gray-300 border-gray-300 shadow-sm px-3 py-2 focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm"
+        min={minValue}
+        className="block w-full rounded-md outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 border-gray-300 shadow-sm px-3 py-2 focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm dark:bg-gray-700 dark:text-white"
       />
     </div>
   );
@@ -283,14 +288,14 @@ function InputField({ label, type = "text", value, onChange }) {
 function Dropdown({ label, options, value, onChange }) {
   return (
     <div>
-      <label htmlFor={label.toLowerCase()} className="block text-sm font-medium text-gray-900 mb-1">
+      <label htmlFor={label.toLowerCase()} className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-1">
         {label}
       </label>
       <select
         id={label.toLowerCase()}
         value={value}
         onChange={onChange}
-        className="block w-full rounded-md outline outline-1 -outline-offset-1 outline-gray-300 border-gray-300 shadow-sm px-3 py-2 appearance-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm"
+        className="block w-full rounded-md outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 border-gray-300 shadow-sm px-3 py-2 appearance-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm dark:bg-gray-700 dark:text-white"
       >
         <option value="">Select {label}</option>
         {options.map((option) => (

@@ -137,7 +137,7 @@ const ThroughputThresholdDashboard = ({ userData }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <SideBar userData={userData} isOpen={isSidebarOpen} />
 
             {/* Navbar */}
@@ -147,20 +147,20 @@ const ThroughputThresholdDashboard = ({ userData }) => {
 
             {/* Header - Title and Back to KPI Page button*/}
             <div className="flex justify-between items-center mx-10">
-                <h1 className="text-3xl font-bold mb-6">
+                <h1 className="text-3xl font-bold mb-6 dark:text-white">
                     Throughput Threshold Dashboard
                 </h1>
                 <button
-                    className="bg-red-600 text-white py-1 px-3 rounded"
-                    onClick={handleViewDetails}  //bg-gray-500 hover
+                    className="bg-red-600 dark:bg-red-700 text-white py-1 px-3 rounded hover:bg-red-700 dark:hover:bg-red-800 transition-colors"
+                    onClick={handleViewDetails}
                 >
                     Back to KPI Overview
                 </button>
             </div>
 
             {loading ? (
-                <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm p-4">
-                    <div className="animate-pulse text-gray-600">Loading data...</div>
+                <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                    <div className="animate-pulse text-gray-600 dark:text-gray-400">Loading data...</div>
                 </div>
             ) : (
                 <>
@@ -176,7 +176,13 @@ const ThroughputThresholdDashboard = ({ userData }) => {
 
                     {/* Week by week throughput data */}
                     <div className="flex-1 sm:ml-10 sm:mt-2 mx-10">
-                        <ThroughputBarGraph data={data} loading={loading} title={'Throughput per Week'} isStacked={true} />
+                        <ThroughputBarGraph 
+                            data={data} 
+                            loading={loading} 
+                            title={'Throughput per Week'} 
+                            isStacked={true} 
+                            darkMode={true} // Make sure your ThroughputBarGraph component supports dark mode
+                        />
                     </div>
                 </>
             )}

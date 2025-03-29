@@ -5,19 +5,11 @@ const OrderFulfillmentTable = ({ currentPeriod, formatPeriodDate, filterType }) 
   const prepareStatsData = (periodData) => {
     if (!periodData) return [];
     
-    const total = periodData.total_orders_count || 0; // Get total orders started in period
-    
-    // Get count of orders in various states
+    const total = periodData.total_orders_count || 0;
     const fullyFulfilled = periodData.fully_fulfilled || 0;
     const partiallyFulfilled = periodData.partially_fulfilled || 0;
     const ordersStarted = periodData.orders_started || 0;
-    
-    // Calculate orders that are started but not in progress or completed
-    // This is the difference between all started orders and those that are partially or fully fulfilled
     const startedOnly = Math.max(0, ordersStarted - partiallyFulfilled - fullyFulfilled);
-    
-    // Not started orders - these have null or "Not Started" status in DB
-    // This is the difference between total orders started and orders started
     const notStarted = Math.max(0, total - ordersStarted);
 
     return [
@@ -47,27 +39,42 @@ const OrderFulfillmentTable = ({ currentPeriod, formatPeriodDate, filterType }) 
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-medium mb-4">Order Fulfillment Statistics</h3>
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm dark:shadow-gray-700/50">
+      <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">
+        Order Fulfillment Statistics
+      </h3>
       <div className="overflow-hidden">
-        <p className="text-gray-600 mb-2">
-          Period: <span className="font-medium">{formatPeriodDate(currentPeriod.period)}</span>
+        <p className="text-gray-600 dark:text-gray-400 mb-2">
+          Period: <span className="font-medium dark:text-gray-300">{formatPeriodDate(currentPeriod.period)}</span>
         </p>
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
-              <th className="border border-gray-300 px-4 py-2 text-right">Count</th>
-              <th className="border border-gray-300 px-4 py-2 text-right">Percentage</th>
+            <tr className="bg-gray-100 dark:bg-gray-700">
+              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-gray-300">
+                Status
+              </th>
+              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-800 dark:text-gray-300">
+                Count
+              </th>
+              <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-800 dark:text-gray-300">
+                Percentage
+              </th>
             </tr>
           </thead>
           <tbody>
             {prepareStatsData(currentPeriod).map((entry, index) => (
-              <tr key={index} className={index === 0 ? "font-semibold bg-gray-50" : ""}>
-                <td className="border border-gray-300 px-4 py-2">{entry.name}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{entry.value}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">
-                  {index === 0||index === 1 ? '-' : `${entry.percent}%`}
+              <tr 
+                key={index} 
+                className={index === 0 ? "font-semibold bg-gray-50 dark:bg-gray-700" : ""}
+              >
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-gray-300">
+                  {entry.name}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-800 dark:text-gray-300">
+                  {entry.value}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-800 dark:text-gray-300">
+                  {index === 0 || index === 1 ? '-' : `${entry.percent}%`}
                 </td>
               </tr>
             ))}

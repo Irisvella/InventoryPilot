@@ -4,7 +4,6 @@ import axios from "axios";
 import SideBar from "../dashboard_sidebar1/App";
 import NavBar from "../navbar/App";
 
-
 import {
   BarChart,
   Bar,
@@ -32,7 +31,29 @@ const ActiveOrdersDetails = ({ userData }) => {
     assignedEmployee: "",
     status: "",
   });
-  
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check for dark mode class on the HTML element
+    const htmlElement = document.documentElement;
+    setIsDarkMode(htmlElement.classList.contains('dark'));
+    
+    // Set up a mutation observer to watch for class changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          setIsDarkMode(htmlElement.classList.contains('dark'));
+        }
+      });
+    });
+    
+    observer.observe(htmlElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -85,33 +106,33 @@ const ActiveOrdersDetails = ({ userData }) => {
     name,
     value,
   }));
-  const COLORS = ["#8B0000", "#A52A2A"]; // Dark red for Picked, slightly lighter dark red for Pending
+  const COLORS = isDarkMode ? ["#8884d8", "#ff4444"] : ["#8B0000", "#A52A2A"];
+
   const handleViewDetails = () => {
     navigate('/kpi');
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className={`flex min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <SideBar userData={userData} isOpen={isSidebarOpen} />
 
       <div className="flex-1 sm:ml-10 sm:mt-2">
         <NavBar />
         <div className="flex-1 p-6">
-
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold mb-6 ml-10">
-            Active Orders Details
-          </h1>
-          <button 
-            className="bg-red-600 text-white py-1 px-3 rounded"
-            onClick={handleViewDetails}  //bg-gray-500 hover
+          <div className="flex justify-between items-center mb-4">
+            <h1 className={`text-3xl font-bold mb-6 ml-10 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+              Active Orders Details
+            </h1>
+            <button 
+              className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-red-600'} text-white py-1 px-3 rounded`}
+              onClick={handleViewDetails}
             >
-            Back to KPI Overview
-          </button>
+              Back to KPI Overview
+            </button>
           </div>
 
           {/* Filter Section */}
-          <div className="mb-6 bg-white p-4 rounded-lg shadow">
+          <div className={`mb-6 p-4 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 type="text"
@@ -119,7 +140,7 @@ const ActiveOrdersDetails = ({ userData }) => {
                 placeholder="Filter by Order ID"
                 value={filters.orderId}
                 onChange={handleFilterChange}
-                className="p-2 border rounded"
+                className={`p-2 border rounded ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white'}`}
               />
               <input
                 type="text"
@@ -127,13 +148,13 @@ const ActiveOrdersDetails = ({ userData }) => {
                 placeholder="Filter by Assigned Employee"
                 value={filters.assignedEmployee}
                 onChange={handleFilterChange}
-                className="p-2 border rounded"
+                className={`p-2 border rounded ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white'}`}
               />
               <select
                 name="status"
                 value={filters.status}
                 onChange={handleFilterChange}
-                className="p-2 border rounded"
+                className={`p-2 border rounded ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white'}`}
               >
                 <option value="">All Statuses</option>
                 <option value="Picked">Picked</option>
@@ -145,24 +166,30 @@ const ActiveOrdersDetails = ({ userData }) => {
           {/* Graphs Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Bar Chart: Items per Order */}
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Items per Order</h2>
+            <div className={`p-4 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Items per Order</h2>
               {filteredOrders.length > 0 ? (
                 <BarChart width={500} height={300} data={barChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="items" fill="#8B0000" /> {/* Dark red color */}
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#4A5568' : '#E2E8F0'} />
+                  <XAxis dataKey="name" stroke={isDarkMode ? '#E2E8F0' : '#1A202C'} />
+                  <YAxis stroke={isDarkMode ? '#E2E8F0' : '#1A202C'} />
+                  <Tooltip 
+                    contentStyle={isDarkMode ? { 
+                      backgroundColor: '#2D3748',
+                      borderColor: '#4A5568',
+                      color: '#E2E8F0'
+                    } : {}}
+                  />
+                  <Bar dataKey="items" fill={isDarkMode ? "#8884d8" : "#8B0000"} />
                 </BarChart>
               ) : (
-                <p className="text-center">No data to display</p>
+                <p className={`text-center ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>No data to display</p>
               )}
             </div>
 
             {/* Pie Chart: Status Distribution */}
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">
+            <div className={`p-4 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
                 Item Status Distribution
               </h2>
               {pieChartData.length > 0 ? (
@@ -172,9 +199,9 @@ const ActiveOrdersDetails = ({ userData }) => {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    fill="#8B0000" // Base dark red color
+                    fill="#8884d8"
                     dataKey="value"
-                    label
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   >
                     {pieChartData.map((entry, index) => (
                       <Cell
@@ -183,40 +210,46 @@ const ActiveOrdersDetails = ({ userData }) => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={isDarkMode ? { 
+                      backgroundColor: '#2D3748',
+                      borderColor: '#4A5568',
+                      color: '#E2E8F0'
+                    } : {}}
+                  />
                   <Legend />
                 </PieChart>
               ) : (
-                <p className="text-center">No data to display</p>
+                <p className={`text-center ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>No data to display</p>
               )}
             </div>
           </div>
 
           {/* Orders Table */}
           {loading ? (
-            <p>Loading...</p>
+            <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Loading...</p>
           ) : error ? (
             <p className="text-red-500">{error}</p>
           ) : (
-            <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
+            <div className={`p-4 rounded-lg shadow overflow-x-auto ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <table className="min-w-full">
                 <thead>
-                  <tr className="bg-gray-200">
-                    <th className="p-2 text-left">Order ID</th>
-                    <th className="p-2 text-left">Start Date</th>
-                    <th className="p-2 text-left">Due Date</th>
-                    <th className="p-2 text-left">Assigned To</th>
-                    <th className="p-2 text-left">Items</th>
+                  <tr className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}>
+                    <th className={`p-2 text-left ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Order ID</th>
+                    <th className={`p-2 text-left ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Start Date</th>
+                    <th className={`p-2 text-left ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Due Date</th>
+                    <th className={`p-2 text-left ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Assigned To</th>
+                    <th className={`p-2 text-left ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Items</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredOrders.map((order) => (
-                    <tr key={order.order_id} className="border-t">
-                      <td className="p-2">{order.order_id}</td>
-                      <td className="p-2">{order.start_date}</td>
-                      <td className="p-2">{order.due_date}</td>
-                      <td className="p-2">{order.assigned_employee}</td>
-                      <td className="p-2">
+                    <tr key={order.order_id} className={isDarkMode ? 'border-gray-700 border-t' : 'border-t'}>
+                      <td className={`p-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{order.order_id}</td>
+                      <td className={`p-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{order.start_date}</td>
+                      <td className={`p-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{order.due_date}</td>
+                      <td className={`p-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>{order.assigned_employee}</td>
+                      <td className={`p-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
                         <ul>
                           {order.items.map((item, index) => (
                             <li key={index}>

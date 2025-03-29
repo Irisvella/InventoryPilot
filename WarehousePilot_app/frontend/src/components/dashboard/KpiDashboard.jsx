@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Added for navigation
-// import Header from "../dashboard_sidebar/Header";
+import { useNavigate } from "react-router-dom";
 import CycleTime from "./CycleTime";
 import OrderPickingAccuracy from "./OrderPickingAccuracy";
-// import StockLevels from "./StockLevels";
 import WarehouseThroughput from "./WarehouseThroughput";
-// import OrderFulfillmentRate from "./OrderFulfillmentRate";
-// import StockLevelsPreview from "./StockLevelsPreview";
 import ThroughputThresholdKpiPreview from "../kpis/throughput-threshold/throughput-threshold-kpi-preview"
 import OrderFulfillmentPreview from "../kpis/OrderFulfillmentPreview"
 import SideBar from "../dashboard_sidebar1/App";
@@ -39,8 +35,6 @@ const KPIDashboard = ({ userData }) => {
           axios.get(`${API_BASE_URL}/kpi_dashboard/active-orders/`),
           axios.get(`${API_BASE_URL}/kpi_dashboard/completed-orders/`),
         ]);
-        console.log("Active Orders Data:", activeResponse.data);
-        console.log("Completed Orders Data:", completedResponse.data);
         setActiveOrdersData(activeResponse.data);
         setCompletedOrdersData(completedResponse.data);
         const activeTotal = activeResponse.data.reduce((sum, entry) => sum + entry.active_orders, 0);
@@ -58,30 +52,24 @@ const KPIDashboard = ({ userData }) => {
     fetchData();
   }, []);
 
-  // Function to handle navigation to details page
   const handleViewDetails = () => {
     navigate('/active-orders-details');
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 " >
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
       <SideBar userData={userData} isOpen={isSidebarOpen} />
       
-           
-            <div className="flex-1 sm:ml-10 sm:mt-2">
-            <NavBar />
-        {/* KPI Dashboard Content */}
+      <div className="flex-1 sm:ml-10 sm:mt-2">
+        <NavBar />
         <main className="flex-1 p-12">
-          {/* Title */}
-          {/* <h1 className="text-3xl font-bold text-center m-6">KPI Dashboard</h1> */}
-
-          {/* Overview Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {/* Individual metric cards */}
-            <div className="bg-white p-4 shadow rounded-lg">
+          {/* Overview Section - Top 3 Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* Active Orders Card */}
+            <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Active Orders</h2>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Active Orders</h2>
                 <button
                   onClick={handleViewDetails}
                   className="bg-gray-500 hover:bg-red-600 text-white py-1 px-3 rounded"
@@ -90,17 +78,17 @@ const KPIDashboard = ({ userData }) => {
                 </button>
               </div>
               {loading ? (
-                <p className="text-center">Loading...</p>
+                <p className="text-center text-gray-800 dark:text-white">Loading...</p>
               ) : error ? (
                 <p className="text-red-500 text-center">{error}</p>
               ) : (
                 <div className="flex flex-col">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-3xl font-bold">{totalActiveOrders.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalActiveOrders.toLocaleString()}</p>
                   </div>
                   <div>
                     <LineChart width={300} height={150} data={activeOrdersData}>
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={document.documentElement.classList.contains('dark') ? '#4A5568' : '#E2E8F0'} />
                       <XAxis dataKey="date" hide />
                       <YAxis hide />
                       <Tooltip />
@@ -110,21 +98,23 @@ const KPIDashboard = ({ userData }) => {
                 </div>
               )}
             </div>
-            <div className="bg-white p-4 shadow rounded-lg">
-              <h2 className="text-xl font-semibold">Completed Orders</h2>
+
+            {/* Completed Orders Card */}
+            <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Completed Orders</h2>
               {loading ? (
-                <p className="text-center">Loading...</p>
+                <p className="text-center text-gray-800 dark:text-white">Loading...</p>
               ) : error ? (
                 <p className="text-red-500 text-center">{error}</p>
               ) : (
                 <div className="flex flex-col">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-3xl font-bold">{totalCompletedOrders.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalCompletedOrders.toLocaleString()}</p>
                     <p className="text-red-500">-25%</p>
                   </div>
                   <div>
                     <LineChart width={300} height={150} data={completedOrdersData}>
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={document.documentElement.classList.contains('dark') ? '#4A5568' : '#E2E8F0'} />
                       <XAxis dataKey="date" hide />
                       <YAxis hide />
                       <Tooltip />
@@ -134,63 +124,41 @@ const KPIDashboard = ({ userData }) => {
                 </div>
               )}
             </div>
-            <div className="bg-white ps-4 p-4 shadow rounded-lg">
-              <h2 className="text-xl font-semibold"></h2>
+
+            {/* Order Picking Accuracy Card */}
+            <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Order Picking Accuracy</h2>
               <div className="accuracy-metrics">
                 <OrderPickingAccuracy />
               </div>
             </div>
-            {/* <div className="bg-white p-4 shadow rounded-lg">
-              <h2 className="text-xl font-semibold">Sessions</h2>
-              <p className="text-3xl font-bold">13,277</p>
-              <p className="text-green-500">+35%</p>
-            </div> */}
           </div>
 
-          {/* Graph Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* Left graph */}
-            <div className="bg-white p-4 shadow rounded-lg flex flex-col h-full">
-
+          {/* First Row of Graphs */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
               <ThroughputThresholdKpiPreview/>
             </div>
-
-            {/* Right graph */}
-            <div className="bg-white p-4 shadow rounded-lg flex flex-col h-full">
-              {/* Placeholder for graph */}
+            <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
               <OrderFulfillmentPreview/>
             </div>
           </div>
 
-          {/* Graph Section */}
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* CTPO graph */}
-            <div className="bg-white p-4 shadow rounded-lg flex flex-col h-full">
+          {/* Second Row of Graphs */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
               <CTPOPreview />
-              {/* Placeholder for graph */}
             </div>
-          </div>         
+            {/* You can add another graph here if needed */}
+          </div>
 
           {/* Details Section */}
-          <div className="mt-6 bg-white p-4 shadow rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Details</h2>
-            {/* Placeholder for table or additional data */}
-            <div className="h-64 bg-gray-200 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 p-4 shadow rounded-lg">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Details</h2>
+            <div className="h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
               Table/Data Placeholder
             </div>
           </div>
-
-          {/* Cards Container */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <CycleTime />
-            <OrderPickingAccuracy />
-            <StockLevels />
-            <WarehouseThroughput />
-            <OrderFulfillmentRate />
-            <StockLevels />
-          </div> */}
         </main>
       </div>
     </div>

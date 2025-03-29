@@ -39,34 +39,52 @@ export default function ManageUsersPage() {
     }, []);
 
     return (
-        <div className="h-full">
-
-            {/* Main Content */}
-            <div className="flex-1 ">
-                <SideBar />
-    
-
-                <main className="flex p-6 h-screen justify-center ">
-                    {/* Cards Container */}
-                    <div className="flex flex-col m-auto w-full max-w-7xl">
-                        <Box
-                            className="flex flex-wrap items-center justify-between gap-4 p-4 bg-white border border-gray-300 rounded-md mb-5"
-                            sx={{
-                                width: "100%",
-                                bgcolor: "rgb(255 255 255 / var(--tw-bg-opacity, 1))",
-                                fontSize: "0.875rem",
-                                fontWeight: "700",
-                            }}
-                        >
-                            <Button variant="contained" color="success" href="/admin_dashboard/add_users">
-                                Add new staff
-                            </Button>
-                            <h2 className="text-lg font-bold">Total number of staff: {staffAmount}</h2>
-                        </Box>
-                        <UsersTable onStaffCountChange={setStaffAmount} />
-                    </div>
-                </main>
+       
+        <div className="flex-1 px-10 dark:bg-gray-900" >
+            <SideBar />
+            <div className="flex-1">
+             
+                {/* Main Content */}
+                <div className="flex flex-col w-full max-w-7xl mx-auto">
+                    <Box
+                        className="flex flex-wrap items-center justify-between gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md mb-5"
+                        sx={{
+                            width: "100%",
+                            fontSize: "0.875rem",
+                            fontWeight: "700",
+                        }}
+                    >
+                        <Button variant="contained" color="success" href="/admin_dashboard/add_users">
+                            Add new staff
+                        </Button>
+                        <h2 className="text-lg font-bold dark:text-white">Total number of staff: {staffAmount}</h2>
+                    </Box>
+                    
+                    <UsersTable 
+                        onStaffCountChange={setStaffAmount} 
+                        classNames={{
+                            wrapper: "dark:bg-gray-800",
+                            th: "dark:bg-gray-700 dark:text-white",
+                            tr: "dark:hover:bg-gray-700",
+                            td: "dark:text-white dark:before:bg-transparent"
+                        }}
+                    />
+                </div>
+                
+                <ToastContainer 
+                    position="bottom-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                />
             </div>
         </div>
+   
     );
 };

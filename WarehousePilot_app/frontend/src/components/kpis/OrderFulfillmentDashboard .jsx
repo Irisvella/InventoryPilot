@@ -9,13 +9,9 @@ const API_BASE_URL = "http://127.0.0.1:8000/kpi_dashboard"; // Update with your 
 
 const OrderFulfillmentDashboard = () => {
   const [data, setData] = useState([]);
-  // This "currentPeriod" will hold the aggregated data for the donut & table
   const [currentPeriod, setCurrentPeriod] = useState(null);
-
   const [filterType, setFilterType] = useState('month');
-  // Keep using the same date picker
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -23,7 +19,6 @@ const OrderFulfillmentDashboard = () => {
     fetchData();
   }, [filterType, selectedDate]);
 
-  // Fetch daily data from your existing endpoint
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -51,10 +46,7 @@ const OrderFulfillmentDashboard = () => {
         setData([]);
         setCurrentPeriod(null);
       } else {
-        // "data" is an array of daily objects
         setData(result);
-
-        // Create a single aggregated object for the entire date range
         const aggregated = aggregatePeriodData(result);
         setCurrentPeriod(aggregated);
       }
@@ -68,31 +60,28 @@ const OrderFulfillmentDashboard = () => {
     }
   };
 
-  // Sum the orders
-const aggregatePeriodData = (dailyArray) => {
-  let ordersStartedSum = 0;
-  let partiallyFulfilledSum = 0;
-  let fullyFulfilledSum = 0;
+  const aggregatePeriodData = (dailyArray) => {
+    let ordersStartedSum = 0;
+    let partiallyFulfilledSum = 0;
+    let fullyFulfilledSum = 0;
 
-  dailyArray.forEach((day) => {
-    ordersStartedSum += day.orders_started || 0;
-    partiallyFulfilledSum += day.partially_fulfilled || 0;
-    fullyFulfilledSum += day.fully_fulfilled || 0;
-  });
+    dailyArray.forEach((day) => {
+      ordersStartedSum += day.orders_started || 0;
+      partiallyFulfilledSum += day.partially_fulfilled || 0;
+      fullyFulfilledSum += day.fully_fulfilled || 0;
+    });
 
-  // For total_orders_count
-  const totalOrdersCount = dailyArray[dailyArray.length - 1].total_orders_count || 0;
+    const totalOrdersCount = dailyArray[dailyArray.length - 1].total_orders_count || 0;
 
-  return {
-    period: selectedDate, // or any label
-    total_orders_count: totalOrdersCount,  // Don't sum it
-    orders_started: ordersStartedSum,
-    partially_fulfilled: partiallyFulfilledSum,
-    fully_fulfilled: fullyFulfilledSum,
+    return {
+      period: selectedDate,
+      total_orders_count: totalOrdersCount,
+      orders_started: ordersStartedSum,
+      partially_fulfilled: partiallyFulfilledSum,
+      fully_fulfilled: fullyFulfilledSum,
+    };
   };
-};
 
-  // Format date for display
   const formatPeriodDate = (dateStr) => {
     if (!dateStr) return "N/A";
     
@@ -118,20 +107,22 @@ const aggregatePeriodData = (dailyArray) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navbar */}
       <NavBar />
 
-      <div className="max-w-screen mx-auto px-10 py-8">
-        <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
+      <div className="max-w-screen mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-gray-700/50">
           {/* Filter controls */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">Order Fulfillment Dashboard</h2>
-            <div className="flex space-x-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+              Order Fulfillment Dashboard
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full md:w-auto">
               <select 
                 value={filterType} 
                 onChange={(e) => setFilterType(e.target.value)} 
-                className="border rounded-md px-2 py-1"
+                className="border rounded-md px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               >
                 <option value="day">Daily</option>
                 <option value="week">Weekly</option>
@@ -141,19 +132,19 @@ const aggregatePeriodData = (dailyArray) => {
                 type="date" 
                 value={selectedDate} 
                 onChange={(e) => setSelectedDate(e.target.value)} 
-                className="border rounded-md px-2 py-1"
+                className="border rounded-md px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               />
             </div>
           </div>
 
           {/* Main content */}
           {error ? (
-            <div className="text-red-500 text-center p-4 bg-white rounded-lg shadow-sm">
+            <div className="text-red-500 dark:text-red-400 text-center p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
               {error}
             </div>
           ) : loading ? (
-            <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm p-4">
-              <div className="animate-pulse text-gray-600">Loading data...</div>
+            <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-700 rounded-lg shadow-sm p-4">
+              <div className="animate-pulse text-gray-600 dark:text-gray-400">Loading data...</div>
             </div>
           ) : currentPeriod ? (
             <div className="flex flex-col gap-6">
@@ -172,26 +163,26 @@ const aggregatePeriodData = (dailyArray) => {
                 {data.length > 0 ? (
                   <OrderFulfillmentBarChart data={data} />
                 ) : (
-                  <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                    <p className="text-gray-600">Not enough historical data to display trends.</p>
-                    <p className="text-gray-500 text-sm">Try selecting a different date range to see more data points.</p>
+                  <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm text-center">
+                    <p className="text-gray-600 dark:text-gray-400">Not enough historical data to display trends.</p>
+                    <p className="text-gray-500 dark:text-gray-500 text-sm">Try selecting a different date range to see more data points.</p>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm text-center">
+            <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-700 rounded-lg shadow-sm text-center">
               <div className="text-5xl mb-4">🔍</div>
-              <h3 className="text-xl font-medium text-gray-800 mb-2">
+              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Hmm, nothing to see here!
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 We couldn't find any order data for the selected period.
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
                 Try selecting a different date or time range.
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
                 <b>January 4th 2025</b> could be a good example
               </p>
             </div>

@@ -420,7 +420,7 @@ export default function ManuTasksTable() {
       <div className="mb-[18px] flex items-center justify-between" style={{ marginTop: "40px" }}>
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-[700] leading-[32px]">
-            <b>Manufacturing Tasks</b>
+            <b className="dark:text-white">Manufacturing Tasks</b>
           </h1>
           <Tooltip content="Total number of tasks">
           <Chip className="hidden items-center text-default-500 sm:flex" size="sm" variant="flat">
@@ -436,18 +436,17 @@ export default function ManuTasksTable() {
     return (
       
       <div className="flex flex-col justify-between gap-2 px-2 py-2 sm:flex-row">
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          page={page}
-          total={pages}
-          onChange={setPage}
-          classNames={{
-            item: "bg-white text-black",
-            cursor: "bg-black text-white",
-          }}
-        />
+       
+         <Pagination
+                      total={pages}
+                    initialPage={1}
+                   
+                    onChange={setPage}
+                    classNames={{
+                      item: "bg-white text-black dark:bg-gray-700 dark:text-white",
+                      cursor: "bg-black text-white dark:bg-blue-600 dark:text-white",
+                    }}
+                  />
         <div className="flex items-center justify-end gap-6 ml-auto">
           <span className="text-small text-default-400">
             {filterSelectedKeys === "all"
@@ -468,13 +467,13 @@ export default function ManuTasksTable() {
   }, [filterSelectedKeys, page, pages, filteredItems.length, onPreviousPage, onNextPage]);
 
   if (loading) {
-    return <div className="loading-container">Loading... This may take a minute
+    return <div className="loading-container dark:bg-gray-900 dark:text-white">Loading... This may take a minute
     <Spinner size="lg" color="default" className="ms-5"/>
     </div>;
   }
 
   return (
-    <div  className="flex-1 px-10" style={{ backgroundColor: "#F8F8F8",  minHeight: "100vh" }}>
+    <div className="flex-1 px-10 dark:bg-gray-900" style={{ minHeight: "100vh" }}>
      
       <SideBar /> {/* Add the SideBar component here */}
       <div className="flex-1 mt-2 ">
@@ -486,7 +485,10 @@ export default function ManuTasksTable() {
           bottomContent={bottomContent}
           bottomContentPlacement="outside"
           classNames={{
-            td: "before:bg-transparent",
+            wrapper: "dark:bg-gray-800",
+            th: "dark:bg-gray-700 dark:text-white",
+            tr: "dark:hover:bg-gray-700",
+            td: "dark:text-white dark:before:bg-transparent"
           }}
           selectedKeys={filterSelectedKeys}
           selectionMode="multiple"
@@ -508,7 +510,7 @@ export default function ManuTasksTable() {
                 align={column.uid === "actions" ? "end" : "start"}
                 
                 className={cn([
-                  column.uid === "actions" ? "flex items-center justify-end px-[20px]" : "",
+                  column.uid === "actions" ? "flex items-center justify-end px-[20px]" : "", "dark:text-white"
                 ])}
 
                
@@ -525,7 +527,18 @@ export default function ManuTasksTable() {
             )}
           </TableBody>
         </Table>
-        <ToastContainer />
+        <ToastContainer 
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
       </div>
     </div>
   );

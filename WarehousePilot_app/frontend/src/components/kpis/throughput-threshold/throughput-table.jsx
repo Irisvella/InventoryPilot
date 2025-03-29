@@ -30,39 +30,46 @@ export default function ThroughputTable({data}) {
     const columns = ["Week of", "Picked", "Packed", "Shipped"];
 
     return (
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Throughput Data</h2>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4 dark:text-white">Throughput Data</h2>
             <Table 
                 aria-label="Throughput Threshold Table" 
                 className="w-full"
+                classNames={{
+                    wrapper: "dark:bg-gray-800",
+                    th: "dark:bg-gray-800 dark:text-white",
+                    td: "dark:bg-gray-800 dark:text-gray-300",
+                    tr: "dark:hover:bg-gray-700"
+                }}
                 bottomContent={
                     totalPages > 0 ? (
                       <div className="flex w-full justify-center">
-                        <Pagination
-                          isCompact
-                          showControls
-                          showShadow
-                          color="primary"
-                          page={page}
-                          total={totalPages}
-                          onChange={(page) => setPage(page)}
-                        />
+                     <Pagination
+                                         total={totalPages}
+                                         initialPage={1}
+                                         current={page}
+                                         onChange={(newPage) => setPage(newPage)}
+                                         classNames={{
+                                           item: "bg-white text-black dark:bg-gray-700 dark:text-white",
+                                           cursor: "bg-black text-white dark:bg-blue-600 dark:text-white",
+                                         }}
+                                       />
                       </div>
                     ) : null
                   }
             >
                 <TableHeader>
                     {columns.map((column) => (
-                        <TableColumn key={column}>{column}</TableColumn>
+                        <TableColumn key={column} className="dark:text-white">{column}</TableColumn>
                     ))}
                 </TableHeader>
                 <TableBody items={paginatedRows}>
                     {(item) => (
                         <TableRow key={item.key}>
-                            <TableCell>{item.date}</TableCell>
-                            <TableCell>{item.picked ? item.picked : "N/A"}</TableCell>
-                            <TableCell>{item.packed ? item.packed : "N/A"}</TableCell>
-                            <TableCell>{item.shipped ? item.shipped : "N/A"}</TableCell>
+                            <TableCell className="dark:text-gray-300">{item.date}</TableCell>
+                            <TableCell className="dark:text-gray-300">{item.picked ? item.picked : "N/A"}</TableCell>
+                            <TableCell className="dark:text-gray-300">{item.packed ? item.packed : "N/A"}</TableCell>
+                            <TableCell className="dark:text-gray-300">{item.shipped ? item.shipped : "N/A"}</TableCell>
                         </TableRow>
                     )}
                 </TableBody>

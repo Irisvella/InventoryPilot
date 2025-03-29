@@ -5,16 +5,14 @@ import OrderFulfillmentBarChart from "./OrderFulfillmentBarChart";
 const API_BASE_URL = "http://127.0.0.1:8000/kpi_dashboard";
 
 const OrderFulfillmentPreview = () => {
-  const [allData, setAllData] = useState([]);         // Complete dataset from the API
-  const [filteredData, setFilteredData] = useState([]);   // Data filtered by timeline
-  const [range, setRange] = useState("1D");              // Timeline: 1D, 1W, or 1M
+  const [allData, setAllData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [range, setRange] = useState("1D");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Use today's date as reference (YYYY-MM-DD)
   const today = new Date().toISOString().split("T")[0];
 
-  // Fetch data using filter=month and today's date so we get the current month's daily data
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
@@ -26,7 +24,6 @@ const OrderFulfillmentPreview = () => {
           setLoading(false);
           return;
         }
-        // Using filter=month ensures that we get daily records for the entire current month
         const response = await axios.get(
           `${API_BASE_URL}/order-fulfillment-rate/?filter=month&date=${today}`,
           {
@@ -53,7 +50,6 @@ const OrderFulfillmentPreview = () => {
     fetchAllData();
   }, [today]);
 
-  // Filter the full dataset based on the selected timeline.
   useEffect(() => {
     if (!allData.length) {
       setFilteredData([]);
@@ -68,7 +64,6 @@ const OrderFulfillmentPreview = () => {
     } else if (range === "1M") {
       startDate.setMonth(now.getMonth() - 1);
     }
-    // Filter allData (which are daily records) based on the timeline range
     const filtered = allData.filter((dayObj) => {
       const dayDate = new Date(dayObj.period);
       return dayDate >= startDate && dayDate <= now;
@@ -85,20 +80,22 @@ const OrderFulfillmentPreview = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      {/* Inline style block to hide the header (h3) within the chart */}
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm dark:shadow-gray-700/50">
+      {/* Inline style block for dark mode */}
       <style>{`
         .hide-chart-title h3 {
           display: none;
         }
       `}</style>
 
-      {/* Header row: Title + Details button */}
+      {/* Header row */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Order Fulfillment</h2>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+          Order Fulfillment
+        </h2>
         <button
           onClick={handleDetailsClick}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
         >
           View Details
         </button>
@@ -110,10 +107,10 @@ const OrderFulfillmentPreview = () => {
           <button
             key={label}
             onClick={() => handleRangeClick(label)}
-            className={`px-4 py-2 rounded ${
+            className={`px-4 py-2 rounded transition-colors ${
               range === label
                 ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
             }`}
           >
             {label}
@@ -121,17 +118,17 @@ const OrderFulfillmentPreview = () => {
         ))}
       </div>
 
-      {/* Bar Chart wrapped in a div that hides the inner h3 title */}
+      {/* Content Area */}
       {loading ? (
-        <div className="text-center">Loading...</div>
+        <div className="text-center text-gray-600 dark:text-gray-400">Loading...</div>
       ) : error ? (
-        <div className="text-red-500 text-center">{error}</div>
+        <div className="text-red-500 dark:text-red-400 text-center">{error}</div>
       ) : filteredData.length > 0 ? (
         <div className="hide-chart-title">
           <OrderFulfillmentBarChart data={filteredData} />
         </div>
       ) : (
-        <div className="text-center">
+        <div className="text-center text-gray-600 dark:text-gray-400">
           No data available for the selected range.
         </div>
       )}
@@ -140,4 +137,3 @@ const OrderFulfillmentPreview = () => {
 };
 
 export default OrderFulfillmentPreview;
-

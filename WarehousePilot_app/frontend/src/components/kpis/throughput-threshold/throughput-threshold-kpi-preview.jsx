@@ -152,36 +152,37 @@ export default function ThroughputThresholdKpiPreview() {
     };
 
     return (
-        <div className="bg-white p-4 rounded-lg">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
             {/* Header and View Details button */}
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Throughput Threshold</h2>
+                <h2 className="text-xl font-semibold dark:text-white">Throughput Threshold</h2>
                 <button
                     onClick={handleViewDetails}
-                    className="bg-gray-500 hover:bg-red-600 text-white py-1 px-3 rounded"
+                    className="bg-gray-500 dark:bg-gray-700 hover:bg-red-600 dark:hover:bg-red-700 text-white py-1 px-3 rounded transition-colors"
                 >
                     View Details
                 </button>
             </div>
-
+    
             {/* Timeline Range Selector */}
             <div className="flex space-x-2 mb-4">
                 {["Past Week", "Past Month", "Past Year"].map((label) => (
                     <button
                         key={label}
                         onClick={() => handleRangeClick(label)}
-                        className={`px-4 py-2 rounded ${range === label
-                            ? "bg-red-600 text-white"
-                            : "bg-gray-200 text-gray-700"
-                            }`}
+                        className={`px-4 py-2 rounded transition-colors ${
+                            range === label
+                                ? "bg-red-600 dark:bg-red-700 text-white"
+                                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        }`}
                     >
                         {label}
                     </button>
                 ))}
             </div>
-
+    
             {loading ? (
-                <div className="text-center">Loading...</div>
+                <div className="text-center dark:text-gray-400">Loading...</div>
             ) : (
                 <ThroughputBarGraph data={filteredData} loading={loading} isStacked={isStacked} />
             )}

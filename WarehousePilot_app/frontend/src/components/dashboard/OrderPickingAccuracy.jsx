@@ -75,7 +75,7 @@ const OrderPickingAccuracy = () => {
         </p>
       </div>
 
-      <div className="bg-white">
+      <div className="bg-transparent">
         {loading ? (
           <p className="text-center">Loading...</p>
         ) : error ? (

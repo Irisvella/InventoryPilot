@@ -492,15 +492,15 @@ export default function ManageUsersTable() {
 
   const topBar = useMemo(() => {
     return (
-      <div className="mb-[18px] flex items-center justify-between" style={{ marginTop: '40px' }}>
+      <div className="mb-[18px] flex items-center justify-between dark:text-white" style={{ marginTop: '40px' }}>
         <div className="flex w-[226px] items-center gap-2">
-          <h1 className="text-2xl font-[700] leading-[32px]">Staff</h1>
-          <Chip className="hidden items-center text-default-500 sm:flex" size="sm" variant="flat">
+          <h1 className="text-2xl font-[700] leading-[32px] dark:text-white">Staff</h1>
+          <Chip className="hidden items-center text-default-500 dark:text-gray-300 sm:flex" size="sm" variant="flat">
             {allUsers.length}
           </Chip>
         </div>
         <Button
-          className="bg-black  text-white"
+          className="bg-black text-white dark:bg-gray-700 dark:text-white"
           endContent={<Icon icon="solar:add-circle-bold" width={20} />}
           onPress={() => navigate('/admin_dashboard/add_users')}
         >
@@ -512,30 +512,40 @@ export default function ManageUsersTable() {
 
   const bottomContent = useMemo(() => {
     return (
-      <div className="flex flex-col items-center justify-between gap-2 px-2 py-2 sm:flex-row">
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          classNames={{
-            item: "bg-white text-black",
-            cursor: "bg-black text-white",
-                    }}
-          page={page}
-          total={pages}
-          onChange={setPage}
-        />
+      <div className="flex flex-col items-center justify-between gap-2 px-2 py-2 sm:flex-row dark:text-white">
+          <Pagination
+                                   total={pages}
+                                 initialPage={1}
+                                
+                                 onChange={setPage}
+                                 classNames={{
+                                   item: "bg-white text-black dark:bg-gray-700 dark:text-white",
+                                   cursor: "bg-black text-white dark:bg-blue-600 dark:text-white",
+                                 }}
+                               />
         <div className="flex items-center justify-end gap-6">
-          <span className="text-small text-default-400">
+          <span className="text-small text-default-400 dark:text-gray-400">
             {filterSelectedKeys === "all"
               ? "All items selected"
               : `${filterSelectedKeys.size} of ${filteredItems.length} selected`}
           </span>
           <div className="flex items-center gap-3">
-            <Button isDisabled={page === 1} size="sm" variant="flat" onPress={onPreviousPage}>
+            <Button 
+              isDisabled={page === 1} 
+              size="sm" 
+              variant="flat" 
+              className="dark:bg-gray-700 dark:text-white"
+              onPress={onPreviousPage}
+            >
               Previous
             </Button>
-            <Button isDisabled={page === pages} size="sm" variant="flat" onPress={onNextPage}>
+            <Button 
+              isDisabled={page === pages} 
+              size="sm" 
+              variant="flat" 
+              className="dark:bg-gray-700 dark:text-white"
+              onPress={onNextPage}
+            >
               Next
             </Button>
           </div>
@@ -544,35 +554,31 @@ export default function ManageUsersTable() {
     );
   }, [filterSelectedKeys, page, pages, filteredItems.length, onPreviousPage, onNextPage]);
 
-  const handleMemberClick = useMemoizedCallback(() => {
-    setSortDescriptor({
-      column: "memberInfo",
-      direction: sortDescriptor.direction === "ascending" ? "descending" : "ascending",
-    });
-  });
-
   return (
-    <div style={{ marginTop: "-80px" }}> 
+    <div className="dark:bg-gray-900 min-h-screen" style={{ marginTop: "-80px" }}> 
       <NavBar />
       <SideBar />
-    <div className="flex-1 p-6" style={{ padding: '40px' }}>
-      {topBar}
-      <Table
-        isHeaderSticky
-        aria-label="Example table with custom cells, pagination and sorting"
-        bottomContent={bottomContent}
-        bottomContentPlacement="outside"
-        classNames={{
-          td: "before:bg-transparent",
-        }}
-        selectedKeys={filterSelectedKeys}
-        selectionMode="multiple"
-        sortDescriptor={sortDescriptor}
-        topContent={topContent}
-        topContentPlacement="outside"
-        onSelectionChange={onSelectionChange}
-        onSortChange={setSortDescriptor}
-      >
+      <div className="flex-1 p-6 dark:bg-gray-900" style={{ padding: '40px' }}>
+        {topBar}
+        <Table
+          isHeaderSticky
+          aria-label="Example table with custom cells, pagination and sorting"
+          bottomContent={bottomContent}
+          bottomContentPlacement="outside"
+          classNames={{
+            wrapper: "dark:bg-gray-800",
+            th: "dark:bg-gray-800 dark:text-white",
+            tr: "dark:bg-gray-800 dark:hover:bg-gray-700",
+            td: "before:bg-transparent dark:text-white",
+          }}
+          selectedKeys={filterSelectedKeys}
+          selectionMode="multiple"
+          sortDescriptor={sortDescriptor}
+          topContent={topContent}
+          topContentPlacement="outside"
+          onSelectionChange={onSelectionChange}
+          onSortChange={setSortDescriptor}
+        >
         <TableHeader columns={headerColumns}>
           {(column) => (
             <TableColumn

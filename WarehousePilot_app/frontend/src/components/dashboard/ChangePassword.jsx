@@ -89,7 +89,7 @@ function ChangePassword() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex  dark:bg-gray-900 min-h-screen ">
       {/* Sidebar */}
       <SideBar />
 
@@ -102,8 +102,8 @@ function ChangePassword() {
         <div className="p-8 mt-2 ml-2 max-w-2xl">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Change Password</h1>
-            <p className="text-gray-500 text-base">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Change Password</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               Please enter your current password and set a new one below.
             </p>
           </div>
@@ -112,7 +112,7 @@ function ChangePassword() {
           <form onSubmit={handlePasswordChange} className="w-full">
             {/* Old Password */}
             <div className="mb-5">
-              <label htmlFor="old-password" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="old-password" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                 Old Password:
               </label>
               <input
@@ -122,13 +122,13 @@ function ChangePassword() {
                 onChange={(e) => setOldPassword(e.target.value)}
                 required
                 placeholder="Enter your old password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
 
             {/* New Password */}
             <div className="mb-5">
-              <label htmlFor="new-password" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="new-password" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                 New Password:
               </label>
               <input
@@ -141,24 +141,24 @@ function ChangePassword() {
                 }}
                 required
                 placeholder="Enter new password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 <p>Password must contain: </p>
                 <ul className="list-disc pl-5">  
-                  <li className={passwordRequirements.length ? 'text-green-500' : 'text-gray-400'}>
+                  <li className={passwordRequirements.length ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}>
                     At least 8 characters long
                   </li>
-                  <li className={passwordRequirements.uppercase ? 'text-green-500' : 'text-gray-400'}>
+                  <li className={passwordRequirements.uppercase ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}>
                     At least one uppercase letter (A-Z)
                   </li> 
-                  <li className={passwordRequirements.lowercase ? 'text-green-500' : 'text-gray-400'}>
+                  <li className={passwordRequirements.lowercase ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}>
                     At least one lowercase letter (a-z) 
                   </li>
-                  <li className={passwordRequirements.number ? 'text-green-500' : 'text-gray-400'}>
+                  <li className={passwordRequirements.number ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}>
                     At least one number (0-9)
                   </li>
-                  <li className={passwordRequirements.special ? 'text-green-500' : 'text-gray-400'}>
+                  <li className={passwordRequirements.special ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}>
                     At least one special character (!@#$%^&*()_-+=[]{}|;:,.?)
                   </li>
                 </ul>
@@ -167,7 +167,7 @@ function ChangePassword() {
 
             {/* Confirm New Password */}
             <div className="mb-5">
-              <label htmlFor="confirm-new-password" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="confirm-new-password" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                 Confirm New Password:
               </label>
               <input
@@ -177,18 +177,18 @@ function ChangePassword() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="Re-enter new password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
               />
             </div>
 
             {/* Feedback Messages */}
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
+            {error && <p className="text-red-500 dark:text-red-400 text-sm mb-4">{error}</p>}
+            {success && <p className="text-green-500 dark:text-green-400 text-sm mb-4">{success}</p>}
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition duration-200"
+              className="w-full py-3 bg-black dark:bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition duration-200"
             >
               Change Password
             </button>

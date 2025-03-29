@@ -107,6 +107,7 @@ class ProfileView(APIView):
                 'first_name': getattr(user, 'first_name', 'N/A'),
                 'last_name': getattr(user, 'last_name', 'N/A'),
                 'department': getattr(user, 'department', 'N/A'),
+                'theme_preference': getattr(user, 'theme_preference', 'light')
             }
             logger.info(f"Fetched the profile of the user {user.username}")
             return Response(user_data)
@@ -128,3 +129,29 @@ class RetrieveUsers(APIView):
         except Exception as e:
             logger.error("Failed to retrieve all users data from the database (auth)")
             return Response({"error": str(e)}, status=500)
+
+
+class ThemePreferenceView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Retrieve the current user's theme preference"""
+        user = request.user
+        return Response({"theme_preference": user.theme_preference}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """Update the user's theme preference"""
+        theme = request.data.get("theme")
+        if theme not in ['light', 'dark']:
+            return Response(
+                {"error": "Invalid theme choice. Please select 'light' or 'dark'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = request.user
+        user.theme_preference = theme
+        user.save()
+
+        logger.info(f"User {user.username} successfully updated their theme preference to {theme}.")
+        return Response({"detail": f"Theme preference updated to {theme}"}, status=status.HTTP_200_OK)

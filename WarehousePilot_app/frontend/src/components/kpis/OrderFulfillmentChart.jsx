@@ -11,14 +11,11 @@ const OrderFulfillmentChart = ({ currentPeriod }) => {
   const prepareChartData = (periodData) => {
     if (!periodData) return [];
     
-    const startedOrders = periodData.orders_started || 0; // Orders that are in progress
-    
-    // Calculate "started only" - orders that are started but not in manufacturing
+    const startedOrders = periodData.orders_started || 0;
     const startedOnly = Math.max(0, startedOrders - 
                               (periodData.partially_fulfilled || 0) - 
                               (periodData.fully_fulfilled || 0));
     
-    // Only include the three requested categories - percentages based on started orders
     return [
       { 
         name: 'Fully Fulfilled', 
@@ -45,7 +42,7 @@ const OrderFulfillmentChart = ({ currentPeriod }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-2 border border-gray-200 shadow-sm rounded">
+        <div className="bg-white dark:bg-gray-700 p-2 border border-gray-200 dark:border-gray-600 shadow-sm rounded text-gray-800 dark:text-gray-200">
           <p className="font-medium">{payload[0].payload.name}</p>
           <p>Count: {payload[0].payload.count}</p>
           <p>Percentage: {payload[0].payload.percent}%</p>
@@ -63,7 +60,6 @@ const OrderFulfillmentChart = ({ currentPeriod }) => {
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
     const chartData = prepareChartData(currentPeriod);
-    // Only show label if percentage is significant enough (>5%)
     if (parseFloat(chartData[index].percent) < 5) return null;
 
     return (
@@ -85,13 +81,13 @@ const OrderFulfillmentChart = ({ currentPeriod }) => {
   const startedOrders = currentPeriod?.orders_started || 0;
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-medium mb-4">Started Orders Breakdown</h3>
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm dark:shadow-gray-700/50">
+      <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Started Orders Breakdown</h3>
       <div className="text-center mb-2">
-        <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold text-gray-900 dark:text-white">
           {startedOrders.toLocaleString()}
         </div>
-        <div className="text-gray-500">Started Orders</div>
+        <div className="text-gray-500 dark:text-gray-400">Started Orders</div>
       </div>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -118,10 +114,13 @@ const OrderFulfillmentChart = ({ currentPeriod }) => {
               align="right"
               formatter={(value, entry, index) => {
                 return (
-                  <span className="text-sm">
+                  <span className="text-sm text-gray-800 dark:text-gray-300">
                     {value}: {chartData[index].percent}%
                   </span>
                 );
+              }}
+              wrapperStyle={{
+                color: '#6B7280' // This ensures legend text is visible in both modes
               }}
             />
           </PieChart>

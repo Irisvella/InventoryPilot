@@ -63,7 +63,7 @@ const OrderFulfillmentBarChart = ({ data }) => {
     const totalStarted = payload[0].payload.totalStarted || 0;
 
     return (
-      <div className="bg-white p-2 border border-gray-200 shadow-sm rounded">
+      <div className="bg-white dark:bg-gray-700 p-2 border border-gray-200 dark:border-gray-600 shadow-sm rounded text-gray-800 dark:text-gray-200">
         <p className="font-medium">{label}</p>
         {payload.map((entry, index) => {
           // Get the actual count based on whether we're using normalized data
@@ -78,7 +78,7 @@ const OrderFulfillmentBarChart = ({ data }) => {
             </p>
           );
         })}
-        <p className="text-gray-600 text-sm mt-1">
+        <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
           Total Started: {totalStarted}
         </p>
       </div>
@@ -86,8 +86,8 @@ const OrderFulfillmentBarChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-medium mb-4">Order Fulfillment Trend</h3>
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm dark:shadow-gray-700/50">
+      <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Order Fulfillment Trend</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -95,11 +95,23 @@ const OrderFulfillmentBarChart = ({ data }) => {
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             {...stackProps}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#eee" strokeOpacity={0.3} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: '#6B7280' }} 
+              stroke="#6B7280"
+            />
+            <YAxis 
+              tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} 
+              tick={{ fill: '#6B7280' }}
+              stroke="#6B7280"
+            />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend 
+              wrapperStyle={{
+                color: '#6B7280'
+              }}
+            />
             <Bar dataKey="Fully Fulfilled" stackId="a" fill={COLORS[0]} />
             <Bar dataKey="Partially Fulfilled" stackId="a" fill={COLORS[1]} />
             <Bar dataKey="Started Only" stackId="a" fill={COLORS[2]} />

@@ -159,3 +159,8 @@ html, body {
   }
 
 }
+/* authentication.css */
+.custom-gray-button {
+  background-color: #f0f0f0; /* Light-ish gray */
+  color: #000000; /* Black text for contrast */
+}

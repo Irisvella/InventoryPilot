@@ -227,185 +227,187 @@ const QATasks = () => {
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
   return (
-  <div style={{ marginTop: "-80px" }}>
+    <div className="dark:bg-gray-900 min-h-screen" style={{ marginTop: "-80px" }}>
       <NavBar />
-      <SideBar /> {/* Add the SideBar component here */}
-      <div className="flex-1 p-6 mt-8" style={{ padding: "40px" }}>
-      <div className="flex-1">
-        <div className="mt-4 p-8">
-          <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold mb-6">QA Tasks</h1>
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-            {/* Filter row with clear filters button */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <Input
-                size="md"
-                placeholder="Search tasks"
-                value={filterValue}
-                onChange={(e) => setFilterValue(e.target.value)}
-                endContent={<SearchIcon className="text-gray-500" width={16} />}
-                className="w-72 rounded border-gray-300 focus:ring focus:ring-blue-200"
-              />
-              <select
-                value={prodQaFilter}
-                onChange={(e) => setProdQaFilter(e.target.value)}
-                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
-              >
-                <option value="all">All Production QA</option>
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-              </select>
-              <select
-                value={paintQaFilter}
-                onChange={(e) => setPaintQaFilter(e.target.value)}
-                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
-              >
-                <option value="all">All Paint QA</option>
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-              </select>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
-              >
-                <option value="all">All Statuses</option>
-                <option value="in progress">In Progress</option>
-                <option value="error">Error</option>
-                <option value="pick and pack">Pick and Pack</option>
-              </select>
-              <input
-                type="date"
-                value={dueDateFilter}
-                onChange={(e) => setDueDateFilter(e.target.value)}
-                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-200"
-              />
-              <Button
-                size="sm"
-                onClick={clearFilters}
-                className="rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-              >
-                Clear Filters
-              </Button>
-            </div>
-            {loading ? (
-              <div className="flex justify-center items-center h-64 text-gray-600 text-xl">
-                Loading...
-              </div>
-            ) : (
-              <>
-                <Table
-                  aria-label="QA tasks"
-                  className="min-w-full bg-white rounded-lg overflow-hidden shadow-md"
+      <SideBar />
+      <div className="flex-1 p-6 mt-8 dark:bg-gray-900" style={{ padding: "40px" }}>
+        <div className="flex-1">
+          <div className="mt-4 p-8">
+            <div className="flex flex-col gap-6">
+              <h1 className="text-2xl font-bold mb-6 dark:text-white">QA Tasks</h1>
+              {error && (
+                <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-100 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
+              )}
+              {/* Filter row with clear filters button */}
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <Input
+                  size="md"
+                  placeholder="Search tasks"
+                  value={filterValue}
+                  onChange={(e) => setFilterValue(e.target.value)}
+                  endContent={<SearchIcon className="text-gray-500 dark:text-gray-400" width={16} />}
+                  className="w-72 rounded border-gray-300 dark:border-gray-600 focus:ring focus:ring-blue-200 dark:focus:ring-blue-800  dark:text-white"
+                />
+                <select
+                  value={prodQaFilter}
+                  onChange={(e) => setProdQaFilter(e.target.value)}
+                  className="p-2 border rounded border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-700 dark:text-white"
                 >
-                  <TableHeader>
-                    <TableColumn>Task ID</TableColumn>
-                    <TableColumn>Qty</TableColumn>
-                    <TableColumn>SKU ID</TableColumn>
-                    <TableColumn>Due Date</TableColumn>
-                    <TableColumn>Production QA</TableColumn>
-                    <TableColumn>Paint QA</TableColumn>
-                    <TableColumn>Actions</TableColumn>
-                    <TableColumn>Status</TableColumn>
-                    <TableColumn>Final QA</TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedRows.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-gray-100 transition-colors">
-                        <TableCell>{item.manufacturing_task_id}</TableCell>
-                        <TableCell>{item.qty}</TableCell>
-                        <TableCell>{item.sku_color}</TableCell>
-                        <TableCell>
-                          {item.due_date !== "N/A"
-                            ? dayjs(item.due_date).format("YYYY-MM-DD")
-                            : "N/A"}
-                        </TableCell>
-                        <TableCell>
-                          <Checkbox
-                            color="success"
-                            isSelected={item.prod_qa === "completed"}
-                            onValueChange={(isSelected) => {
-                              const newProdQa = isSelected ? "completed" : "pending";
-                              handleUpdate(item.manufacturing_task_id, newProdQa, item.paint_qa);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Checkbox
-                            color="success"
-                            isSelected={item.paint_qa === "completed"}
-                            onValueChange={(isSelected) => {
-                              const newPaintQa = isSelected ? "completed" : "pending";
-                              handleUpdate(item.manufacturing_task_id, item.prod_qa, newPaintQa);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="danger"
-                              onClick={() => handleReportError(item.manufacturing_task_id)}
-                              className="rounded"
-                            >
-                              Report Error
-                            </Button>
-                            {item.status === "error" && (
+                  <option value="all">All Production QA</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                </select>
+                <select
+                  value={paintQaFilter}
+                  onChange={(e) => setPaintQaFilter(e.target.value)}
+                  className="p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="all">All Paint QA</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                </select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="in progress">In Progress</option>
+                  <option value="error">Error</option>
+                  <option value="pick and pack">Pick and Pack</option>
+                </select>
+                <input
+                  type="date"
+                  value={dueDateFilter}
+                  onChange={(e) => setDueDateFilter(e.target.value)}
+                  className="p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-700 dark:text-white"
+                />
+                <Button
+                  size="sm"
+                  onClick={clearFilters}
+                  className="rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-800"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+              {loading ? (
+                <div className="flex justify-center items-center h-64 text-gray-600 dark:text-gray-400 text-xl">
+                  Loading...
+                </div>
+              ) : (
+                <>
+                  <Table
+                    aria-label="QA tasks"
+                    className="min-w-full bg-white dark:bg-transparent rounded-lg overflow-hidden shadow-md"
+                  >
+                    <TableHeader>
+                      <TableColumn className="dark:text-white">Task ID</TableColumn>
+                      <TableColumn className="dark:text-white">Qty</TableColumn>
+                      <TableColumn className="dark:text-white">SKU ID</TableColumn>
+                      <TableColumn className="dark:text-white">Due Date</TableColumn>
+                      <TableColumn className="dark:text-white">Production QA</TableColumn>
+                      <TableColumn className="dark:text-white">Paint QA</TableColumn>
+                      <TableColumn className="dark:text-white">Actions</TableColumn>
+                      <TableColumn className="dark:text-white">Status</TableColumn>
+                      <TableColumn className="dark:text-white">Final QA</TableColumn>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedRows.map((item) => (
+                        <TableRow key={item.id} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                          <TableCell className="dark:text-white">{item.manufacturing_task_id}</TableCell>
+                          <TableCell className="dark:text-white">{item.qty}</TableCell>
+                          <TableCell className="dark:text-white">{item.sku_color}</TableCell>
+                          <TableCell className="dark:text-white">
+                            {item.due_date !== "N/A"
+                              ? dayjs(item.due_date).format("YYYY-MM-DD")
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <Checkbox
+                              color="success"
+                              isSelected={item.prod_qa === "completed"}
+                              onValueChange={(isSelected) => {
+                                const newProdQa = isSelected ? "completed" : "pending";
+                                handleUpdate(item.manufacturing_task_id, newProdQa, item.paint_qa);
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Checkbox
+                              color="success"
+                              isSelected={item.paint_qa === "completed"}
+                              onValueChange={(isSelected) => {
+                                const newPaintQa = isSelected ? "completed" : "pending";
+                                handleUpdate(item.manufacturing_task_id, item.prod_qa, newPaintQa);
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 variant="flat"
-                                color="success"
-                                onClick={() => handleErrorFixed(item.manufacturing_task_id)}
-                                className="rounded"
+                                color="danger"
+                                onClick={() => handleReportError(item.manufacturing_task_id)}
+                                className="rounded dark:bg-red-700 dark:text-white"
                               >
-                                Error Reported
+                                Report Error
                               </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{item.status}</TableCell>
-                        <TableCell>
-                          <Checkbox
-                            color="success"
-                            isSelected={item.status === "pick and pack"}
-                            onValueChange={(isSelected) => {
-                              if (isSelected) {
-                                handleFinalQACheck(item.manufacturing_task_id);
-                              }
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className="flex justify-between items-center mt-6">
-                  <span className="text-sm text-gray-600">
-                    Page {page} of {totalPages}
-                  </span>
-                  <Pagination
-                    total={totalPages}
-                    initialPage={1}
-                    current={page}
-                    onChange={(newPage) => setPage(newPage)}
-                    className="text-gray-600"
-                  />
-                </div>
-              </>
-            )}
+                              {item.status === "error" && (
+                                <Button
+                                  size="sm"
+                                  variant="flat"
+                                  color="success"
+                                  onClick={() => handleErrorFixed(item.manufacturing_task_id)}
+                                  className="rounded dark:bg-green-700 dark:text-white"
+                                >
+                                  Error Reported
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="dark:text-white">{item.status}</TableCell>
+                          <TableCell>
+                            <Checkbox
+                              color="success"
+                              isSelected={item.status === "pick and pack"}
+                              onValueChange={(isSelected) => {
+                                if (isSelected) {
+                                  handleFinalQACheck(item.manufacturing_task_id);
+                                }
+                              }}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <div className="flex justify-between items-center mt-6">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Page {page} of {totalPages}
+                    </span>
+                    <Pagination
+                      total={totalPages}
+                      initialPage={1}
+                      current={page}
+                      onChange={(newPage) => setPage(newPage)}
+                      className="text-gray-600 dark:text-gray-400"
+                      classNames={{
+                        item: "dark:bg-gray-700 dark:text-white",
+                        cursor: "dark:bg-gray-600 dark:text-white"
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };
 
 export default QATasks;
-
-

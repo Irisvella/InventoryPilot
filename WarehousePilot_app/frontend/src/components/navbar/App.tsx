@@ -1,6 +1,7 @@
 import type { NavbarProps } from "@heroui/react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
+import ThemeSwitcher from "../ThemeSwitcher";
 import {
   Navbar,
   NavbarBrand,
@@ -95,6 +96,9 @@ export default function NavBar(props: NavbarProps) {
         {/* Conditionally Rendered Navbar Items */}
         <Tooltip content="Dashboard Details">
         <NavbarItem>
+            <ThemeSwitcher />
+          </NavbarItem>
+        <NavbarItem>
           <Link className="text-default-500" href="/dashboard" size="sm">
             Dashboard
           </Link>
@@ -103,6 +107,9 @@ export default function NavBar(props: NavbarProps) {
 
         {(userRole === "admin") && (
           <>
+          <Tooltip>
+            <ThemeSwitcher/>
+          </Tooltip>
             <Tooltip content="View all Key Performance Indicators">
               <NavbarItem><Link className="text-default-500" href="/kpi" size="sm">KPI</Link></NavbarItem>
             </Tooltip>
