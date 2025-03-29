@@ -131,14 +131,14 @@ const QAErrorListView = () => {
   const totalPages = Math.ceil(filteredErrors.length / rowsPerPage);
 
   return (
-    <div style={{ marginTop: "-80px" }} className="dark:bg-gray-900 min-h-screen">
+    <div className="dark:bg-gray-900 min-h-screen">
+    <SideBar /> 
     <NavBar />
-    <SideBar /> {/* Add the SideBar component here */}
-    <div className="flex-1 p-6" style={{ padding: "40px" }}>
-      <div className="flex-1">
-        <div className="mt-8 p-8">
-          <div className="flex flex-col gap-6">
-            <h1 className="text-xl font-bold dark:text-white">QA Error Reports</h1>
+    <div className="flex-1 p-2" style={{ padding: "40px" }}>
+      <div className="flex-1" >
+        <div className="mt-2 ">
+          <div className="flex flex-col gap-6 ">
+            <h1 className="text-xl font-bold dark:text-white mt-2">QA Error Reports</h1>
 
             {errorMsg && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -155,7 +155,7 @@ const QAErrorListView = () => {
               className="w-72 mb-4"
             />
 
-            {/* Additional filter for created date with clear option */}
+        
             <div className="flex flex-wrap items-center gap-4 mb-4">
               <input
                 type="date"

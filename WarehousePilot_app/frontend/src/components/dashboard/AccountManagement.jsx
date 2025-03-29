@@ -30,7 +30,6 @@ function AccountManagement() {
 
   return (
     <div className="dark:bg-gray-900 min-h-screen">
-      {/* Sidebar */}
       <SideBar />
       <NavBar />
       

@@ -457,12 +457,12 @@ const OrderListView = () => {
       
       <SideBar />
      
-      <div className="flex-1  bg-white dark:bg-gray-900 min-h-screen"> {/* Add min-h-screen and remove sm:ml-10 */}
+      <div className="flex-1 bg-white dark:bg-gray-900 min-h-screen"> {/* Add min-h-screen and remove sm:ml-10 */}
         <NavBar />
-        <div className="flex flex-col flex-1 p-8 mt-8 overflow-auto bg-white dark:bg-gray-900"> {/* Remove mt-8 */}
+        <div className="flex flex-col flex-1 p-8  overflow-auto bg-white dark:bg-gray-900"> {/* Remove mt-8 */}
         <div className="flex flex-col flex-1">
           <div className="flex flex-col">
-            <div className="flex flex-row justify-between items-center gap-11 mt-10">
+            <div className="flex flex-row justify-between items-center gap-11 p-2">
               <h1 className="text-2xl font-bold mb-6 dark:text-white">Orders</h1>
               <Chip
   color="primary"
@@ -506,7 +506,7 @@ const OrderListView = () => {
 
             {/* Error message */}
             {error && (
-             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 flex justify-between items-center dark:bg-red-800 dark:border-red-600 dark:text-red-100">
+             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex justify-between items-center dark:bg-red-800 dark:border-red-600 dark:text-red-100">
                 <span>{error}</span>
                 <Button
                   onClick={() => setError(null)}
@@ -521,7 +521,7 @@ const OrderListView = () => {
             )}
 
             {/* Search, Sort and Column Visibility Controls */}
-            <div className="mb-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full">
+            <div className="mb-6 p-2 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full">
               <Input
                 size="md"
                 placeholder="Search by order ID, status, or due date"
@@ -607,12 +607,12 @@ const OrderListView = () => {
               <>
                 <Table
                   aria-label="Inventory Pick List"
-                  className="min-w-full shadow-lg dark:bg-transparent"
+                  className="min-w-full shadow-lg dark:bg-transparent p-2"
                   isHeaderSticky
                   selectionMode="multiple"
                   bottomContentPlacement="outside"
                   classNames={{
-                    wrapper: "dark:bg-gray-800",
+                    wrapper: "dark:bg-gray-800 ",
                     th: "dark:bg-gray-700 dark:text-white",
                     tr: "dark:hover:bg-gray-700",
                     td: "dark:text-white dark:before:bg-transparent"
