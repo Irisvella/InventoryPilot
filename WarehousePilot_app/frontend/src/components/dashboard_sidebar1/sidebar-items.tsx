@@ -15,6 +15,14 @@ return [
     icon: "solar:home-2-linear",
     title: "Dashboard",
 },
+...(userRole === 'admin' ? [
+{
+  key: "OA Report Input",
+  href: "/oa_input",
+  icon: "solar:file-text-outline",
+  title: "OA Report Input",
+},]:[])
+,
   ...(userRole === 'admin' || userRole === 'manager' ? 
   [{
     key: "kpi",

@@ -15,6 +15,7 @@ class OAReport(models.Model):
     client_name = models.CharField(max_length=255)
     project_type = models.CharField(max_length=255)
     area = models.CharField(max_length=255)
+    importance = models.CharField(max_length=255, null=True) # StatutOA
     final_model = models.CharField(max_length=255)
 
     class Meta:

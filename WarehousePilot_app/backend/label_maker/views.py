@@ -33,13 +33,12 @@ def get_label_data(request, picklist_item_id):
             "ORDER_NUMBER": getattr(item.picklist_id.order_id, "order_id", None),
             "QTY_PER_BOX": getattr(part, "qty_per_box", None),
             "CRATE_SIZE": getattr(part, "crate_size", None), # this can somehow return a number or a word... 
-            "AREA": getattr(item.area, "area", None),
-            "LINEUP_NB": getattr(item.lineup_nb, "lineup_nb", None),
-            "MODEL_NB": getattr(item.model_nb, "model_nb", None),
-            "MATERIAL_TYPE": getattr(item.material_type, "material_type", None),
+            "AREA": item.area,
+            "LINEUP_NB": item.lineup_nb,
+            "MODEL_NB": item.model_nb,
+            "MATERIAL_TYPE": item.material_type,
             "SKU_COLOR_IMAGE":part.image.url if part.image else None,
             "BARCODE": None,
-            # Additional fields to be added: qty per case, case size, SKU_COLOR image, barcode
         }
         logger.info(f"Successfully fetched label data for picklist_item_id: {picklist_item_id}")
         return JsonResponse(label_data, status=200)
@@ -51,3 +50,39 @@ def get_label_data(request, picklist_item_id):
         logger.error(f"Picklist item not found for picklist_item_id: {picklist_item_id}")
         return JsonResponse({"error": str(e)}, status=500)
 
+# getting all labels for aggregated view 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_labels_for_order(request, order_id):
+    try:
+        items = (
+            InventoryPicklistItem.objects
+            .select_related('sku_color', 'picklist_id__order_id')
+            .filter(picklist_id__order_id=order_id)
+        )
+
+        labels = []
+        total = items.count()
+
+        for index, item in enumerate(items, start=1):
+            part = item.sku_color
+            labels.append({
+                "SKU_COLOR": (part.sku_color or "").upper(),
+                "QTY": item.amount,
+                "ORDER_NUMBER": item.picklist_id.order_id.order_id,
+                "QTY_PER_BOX": getattr(part, "qty_per_box", None),
+                "CRATE_SIZE": getattr(part, "crate_size", None),
+                "AREA": item.area,
+                "LINEUP_NB": item.lineup_nb,
+                "MODEL_NB": item.model_nb,
+                "MATERIAL_TYPE": item.material_type,
+                "SKU_COLOR_IMAGE": part.image.url if part.image else None,
+                "BARCODE": None,
+                "SEQUENCE": f"{index} of {total}",
+            })
+
+        return JsonResponse({"labels": labels}, status=200)
+
+    except Exception as e:
+        logger.error(f"❌ Error retrieving labels for order {order_id}: {e}")
+        return JsonResponse({"error": str(e)}, status=500)

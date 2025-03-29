@@ -33,6 +33,7 @@ from django.shortcuts import get_object_or_404
 from datetime import datetime
 
 import logging
+from collections import defaultdict
 
 logger = logging.getLogger('WarehousePilot_app')
 
@@ -76,13 +77,14 @@ class GenerateInventoryAndManufacturingListsView(APIView):
             inventoryPicklistItems = []
             manuListItems = []
             for s in inventorySkus: #loop through the unique matching inventory sku set
+                part_obj = Part.objects.get(sku_color=s)
                 # find the total of the quantity of each unique sku in inventory, aggregating all the inventory objects with the same sku together
-                totalInventoryQty = Inventory.objects.filter(sku_color=Part.objects.get(sku_color=s)).aggregate(total=Sum('qty'))['total']
+                totalInventoryQty = Inventory.objects.filter(sku_color=part_obj).aggregate(total=Sum('qty'))['total']                
                 logger.debug(f"total inventory qty: {totalInventoryQty}")
                 ##orderQty = OrderPart.objects.get(order_id=order, sku_color=s).__getattribute__("qty")
-                orderQty = OrderPart.objects.filter(order_id=order, sku_color=s).aggregate(total=Sum('qty'))['total']
+                orderQty = OrderPart.objects.filter(order_id=order, sku_color=part_obj).aggregate(total=Sum('qty'))['total']                
                 logger.debug(f"total order qty: {orderQty}")
-
+                order_part_details = OrderPart.objects.filter(order_id=order, sku_color=part_obj).first()
                 #if inventory amount exceeds needed amount, only the needed amount will be chosen, and if needed amount exceeds available amount, only the available amount is chosen
                 manuListItemQty = 0
                 if orderQty <= totalInventoryQty:
@@ -94,27 +96,47 @@ class GenerateInventoryAndManufacturingListsView(APIView):
                     #create a manufacturing list item with the remaining amount needed for the order
                     manuListItemQty = orderQty - picklistQty
                     logger.debug(f"manuList qty: {manuListItemQty}")
-                    manuListItems.append(ManufacturingListItem(manufacturing_list_id=manufacturingList, sku_color=Part.objects.get(sku_color=s), amount=manuListItemQty))
-                    for x in Inventory.objects.filter(sku_color=s):
+                    manuListItems.append(ManufacturingListItem(manufacturing_list_id=manufacturingList, sku_color=part_obj, amount=manuListItemQty))
+                    for x in Inventory.objects.filter(sku_color=part_obj):
                         x.amount_needed=manuListItemQty
                         x.save()
                 
                 #add the picklist item with the appropriate amount to the list of inventory picklist items
-                matchingInventoryItems = Inventory.objects.filter(sku_color=Part.objects.get(sku_color=s)).order_by('qty')
+                matchingInventoryItems = Inventory.objects.filter(sku_color=part_obj).order_by('qty')
                 index = 0
                 while picklistQty > 0 and index < matchingInventoryItems.count():
                     inventoryLocationQty = matchingInventoryItems[index].qty
-                    if picklistQty <= inventoryLocationQty:
-                        inventoryPicklistItems.append(InventoryPicklistItem(picklist_id = inventoryPicklist, sku_color=Part.objects.get(sku_color=s), amount = picklistQty, status = False, location = matchingInventoryItems[index]))
-                        amount_needed = matchingInventoryItems[index].__getattribute__('amount_needed')
-                        amount_needed = amount_needed + picklistQty
-                        matchingInventoryItems[index].__setattr__('amount_needed', amount_needed)    
-                    else:
-                        inventoryPicklistItems.append(InventoryPicklistItem(picklist_id = inventoryPicklist, sku_color=Part.objects.get(sku_color=s), amount = inventoryLocationQty, status = False, location = matchingInventoryItems[index]))
-                        matchingInventoryItems[index].__setattr__('amount_needed', inventoryLocationQty)
-                    picklistQty = picklistQty - inventoryLocationQty
-                    index += 1
-                
+                    # Desired location name from the OrderPart
+                    preferred_location_name = order_part_details.location
+
+                    # Try to find a matching Inventory object with that location and sku
+                    location = Inventory.objects.filter(
+                        sku_color=part_obj,
+                        location=preferred_location_name
+                    ).order_by('qty').first()
+
+                    # Fallback if not found: use the next best match
+                    if not location:
+                        location = matchingInventoryItems[index]
+                    amount_to_pick = min(picklistQty, inventoryLocationQty)
+                    
+                    inventoryPicklistItems.append(InventoryPicklistItem(
+                        picklist_id=inventoryPicklist,
+                        sku_color=part_obj,
+                        amount=amount_to_pick,
+                        status=False,
+                        location=location,
+                        area=order_part_details.area,
+                        lineup_nb=order_part_details.lineup_nb,
+                        model_nb=order_part_details.final_model,
+                        material_type=order_part_details.material_type
+                    ))
+
+                    location.amount_needed += amount_to_pick
+                    location.save()
+
+                    picklistQty -= amount_to_pick
+                    index += 1                
             #bulk create all the inventory picklist items in the database
             InventoryPicklistItem.objects.bulk_create(inventoryPicklistItems)
             #'''

@@ -77,7 +77,7 @@ const LabelMaker = () => {
             <strong>MODEL:</strong> {labelData.MODEL_NB || "MODEL CODE"}
           </div>
           <div>
-            <strong>SKU:</strong> {labelData.SKU_COLOR || "SKU COLOR"}
+            <strong>SKU:</strong><br/> {labelData.SKU_COLOR || "SKU COLOR"}
           </div>
           <div>
             <strong>QTY:</strong> {labelData.QTY || "QTY"}

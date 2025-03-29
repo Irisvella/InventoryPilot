@@ -321,12 +321,12 @@ const InventoryPicklistItem = () => {
                       <TableHeader className="shadow-xl">
                         <TableColumn className="text-gray-800 font-bold text-base">Picklist Item ID</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Location</TableColumn>
+                        <TableColumn className="text-gray-800 font-bold text-base">Required Quantity</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">SKU Color</TableColumn>
-                        <TableColumn className="text-gray-800 font-bold text-base">Area</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Lineup #</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Model Type</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Material Type</TableColumn>
-                        <TableColumn className="text-gray-800 font-bold text-base">Required Quantity</TableColumn>
+                        <TableColumn className="text-gray-800 font-bold text-base">Area</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Picked Quantity</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Status</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Picked At</TableColumn>
@@ -337,13 +337,27 @@ const InventoryPicklistItem = () => {
                         {paginatedInventoryItems.map((item) => (
                           <TableRow key={item.picklist_item_id}>
                             <TableCell>{item.picklist_item_id}</TableCell>
-                            <TableCell>{item.location}</TableCell>
-                            <TableCell>{item.sku_color}</TableCell>
-                            <TableCell>{item.area || 'N/A'}</TableCell>
+                            <TableCell>
+                              <span className="bg-blue-100 text-black-800 font-semibold px-2 py-1 rounded">
+                                {item.location}
+                              </span>
+                            </TableCell>
+
+                            <TableCell>
+                              <span className="bg-blue-100 text-black-800 font-semibold px-2 py-1 rounded">
+                                {item.quantity}
+                              </span>
+                            </TableCell>
+
+                            <TableCell>
+                              <span className="bg-blue-100 text-black-800 font-semibold px-2 py-1 rounded">
+                                {item.sku_color}
+                              </span>
+                            </TableCell>
                             <TableCell>{item.lineup_nb || 'N/A'}</TableCell>
                             <TableCell>{item.model_nb || 'N/A'}</TableCell>
                             <TableCell>{item.material_type || 'N/A'}</TableCell>
-                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>{item.area || 'N/A'}</TableCell>
                             <TableCell style={{width:"150px", paddingRight:"50px"}}>
                               <Input
                                 type="number"
