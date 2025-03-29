@@ -85,10 +85,10 @@ return [
 }
 ,
 ...(userRole === 'admin' || userRole === 'manager' ? [{
-  key: "logging",
-  href: "/logging",
+  key: "InventoryPickingLogs",
+  href: "/inventory-picking-logs",
   icon: "mdi:file-document-multiple-outline",
-  title: "Logging",
+  title: "Inventory Picking Logs",
 }] : [])
 ,
 ];
