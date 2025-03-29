@@ -17,15 +17,20 @@ const CycleTimeBarChart = ({ data }) => {
     }
 
     return cycleTimeData.map((entry) => {
-      const date = new Date(entry.date);
-      const formattedDate = date.toLocaleDateString(undefined, {
+      const date = new Date(`${entry.day}T00:00:00Z`);
+
+      // Format date to shorthand
+      const formattedDate = new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
-      });
+        timeZone: "UTC",
+      }).format(date);
 
       return {
         name: formattedDate,
-        "Average Cycle Time": entry.avg_cycle_time,
+        picked: entry.picked,
+        packed: entry.packed,
+        shipped: entry.shipped,
       };
     });
   };
@@ -45,7 +50,9 @@ const CycleTimeBarChart = ({ data }) => {
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="Average Cycle Time" fill="#8884d8" />
+            <Bar dataKey="picked" stackId="a" fill="#4CAF50" />
+            <Bar dataKey="packed" stackId="a" fill="#FF9800" />
+            <Bar dataKey="shipped" stackId="a" fill="#2196F3" />
           </BarChart>
         </ResponsiveContainer>
       </div>

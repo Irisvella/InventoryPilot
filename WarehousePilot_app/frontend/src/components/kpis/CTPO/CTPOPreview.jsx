@@ -5,6 +5,15 @@ import CTPOBarChart from "./CTPOBarChart";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const CTPOPreview = () => {
+  const fakeData = [
+    { date: "2025-03-20", avg_cycle_time: 5.2 },
+    { date: "2025-03-21", avg_cycle_time: 4.8 },
+    { date: "2025-03-22", avg_cycle_time: 5.0 },
+    { date: "2025-03-23", avg_cycle_time: 4.9 },
+    { date: "2025-03-24", avg_cycle_time: 5.1 },
+    { date: "2025-03-25", avg_cycle_time: 4.7 },
+    { date: "2025-03-26", avg_cycle_time: 5.3 },
+  ];
   const [allData, setAllData] = useState([]);         // Complete dataset from the API
   const [filteredData, setFilteredData] = useState([]);   // Data filtered by timeline
   const [range, setRange] = useState("1D");              // Timeline: 1D, 1W, or 1M
@@ -28,8 +37,21 @@ const CTPOPreview = () => {
         }
         //`${API_BASE_URL}/order-fulfillment-rate/?filter=month&date=${today}`,
         // Using filter=month ensures that we get daily records for the entire current month
-        const response = await axios.get(
-          `${API_BASE_URL}/orders/ctpo_preview/?filter=month&date=${today}`,
+
+
+        const ctpo_info = await axios.get(
+          `${API_BASE_URL}/orders/cycle_time_per_order/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const response = await axios.post(
+          `${API_BASE_URL}/orders/ctpo_preview/`,
+          ctpo_info.data,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -43,6 +65,7 @@ const CTPOPreview = () => {
         } else {
           setAllData(result);
         }
+
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to fetch data");
@@ -71,7 +94,7 @@ const CTPOPreview = () => {
     }
     // Filter allData (which are daily records) based on the timeline range
     const filtered = allData.filter((dayObj) => {
-      const dayDate = new Date(dayObj.period);
+      const dayDate = new Date(dayObj.day);
       return dayDate >= startDate && dayDate <= now;
     });
     setFilteredData(filtered);

@@ -22,6 +22,7 @@ from django.db.models import Sum
 from django.db.models import Q
 from django.db.models import F
 from rest_framework import status
+from collections import defaultdict
 
 from django.http import JsonResponse
 from django.db import connection
@@ -479,82 +480,77 @@ class CycleTimePerOrderPreview(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def post(self, request):
         try:
-            past_month = (datetime.now() - timedelta(days=30)).date()  # Get the date from 30 days ago
-            today = datetime.now().date()  # Current date
+            # Get the input array from the request body
+            input_data = request.data  # Expecting an array of orders
+            if not isinstance(input_data, list):
+                return Response({"error": "Invalid input format. Expected a list of objects."}, status=400)
 
-            # Query to get the timestamps from each order
-            fetched_orders = Orders.objects.filter(start_timestamp__isnull=False).values(
-                'order_id', 'start_timestamp'
-            )
-            orders = []
+            # Initialize the result array
+            processed_orders = []
 
-            # Calculate cycle time for each order
-            for order in fetched_orders:
-                id = order['order_id']
+            # Process each order
+            for order in input_data:
+                order_id = order.get("order_id")
+                pick_time = order.get("pick_time", 0)
+                pack_time = order.get("pack_time", 0)
+                ship_time = order.get("ship_time", 0)
+                status = order.get("status")
+
+                # Get the start date from the Orders model
                 try:
-                    picklist_completion = InventoryPicklist.objects.filter(order_id=id).values(
-                        'picklist_complete_timestamp'
-                    ).first()
-                    pack_completion = Orders.objects.filter(order_id=id).values('end_timestamp').first()
-                    ship_completion = Orders.objects.filter(order_id=id).values('ship_date').first()
+                    order_obj = Orders.objects.get(order_id=order_id)
+                    start_date = order_obj.start_timestamp.date()
+                except Orders.DoesNotExist:
+                    continue  # Skip if the order doesn't exist
 
-                    if not picklist_completion or not picklist_completion['picklist_complete_timestamp']:
-                        continue  # Skip orders that haven't been picked
+                # Calculate dates based on the status
+                picked_date = start_date + timedelta(days=pick_time)
+                packed_date = picked_date + timedelta(days=pack_time) if status in ["Packed", "Shipped"] else None
+                shipped_date = packed_date + timedelta(days=ship_time) if status == "Shipped" else None
 
-                    picking_duration = abs(
-                        (picklist_completion['picklist_complete_timestamp'].date() - order['start_timestamp'].date()).days
-                    )
-                    packing_duration = (
-                        abs(
-                            (pack_completion['end_timestamp'].date() - picklist_completion['picklist_complete_timestamp'].date()).days
-                        )
-                        if pack_completion and pack_completion['end_timestamp']
-                        else 0
-                    )
-                    shipping_duration = (
-                        abs(
-                            (ship_completion['ship_date'] - pack_completion['end_timestamp'].date()).days
-                        )
-                        if ship_completion and ship_completion['ship_date']
-                        else 0
-                    )
+                # Append the processed order
+                processed_orders.append({
+                    "id": order_id,
+                    "picked_date": picked_date,
+                    "packed_date": packed_date,
+                    "shipped_date": shipped_date,
+                })
 
-                    cycle_time = picking_duration + packing_duration + shipping_duration
-                    completion_date = (
-                        ship_completion['ship_date']
-                        if ship_completion and ship_completion['ship_date']
-                        else picklist_completion['picklist_complete_timestamp'].date()
-                    )
+            # Initialize counters for each day in the past month
+            past_month = (timezone.now() - timedelta(days=30)).date()
+            today = timezone.now().date()
+            daily_data = defaultdict(lambda: {"picked": 0, "packed": 0, "shipped": 0})
 
-                    # Only include orders completed in the past month
-                    if past_month <= completion_date <= today:
-                        orders.append({"date": completion_date, "cycle_time": cycle_time})
+            # Iterate through each processed order and count events per day
+            for order in processed_orders:
+                if order["picked_date"] and past_month <= order["picked_date"] <= today:
+                    daily_data[order["picked_date"]]["picked"] += 1
+                if order["packed_date"] and past_month <= order["packed_date"] <= today:
+                    daily_data[order["packed_date"]]["packed"] += 1
+                if order["shipped_date"] and past_month <= order["shipped_date"] <= today:
+                    daily_data[order["shipped_date"]]["shipped"] += 1
 
-                except Exception as e:
-                    logger.warning(f"Error processing order {id}: {e}")
-                    continue
+            # Pad the result to include all days in the past month
+            result = []
+            current_date = past_month
+            while current_date <= today:
+                result.append({
+                    "day": current_date,
+                    "picked": daily_data[current_date]["picked"],
+                    "packed": daily_data[current_date]["packed"],
+                    "shipped": daily_data[current_date]["shipped"],
+                })
+                current_date += timedelta(days=1)
 
-            # Group orders by day
-            daily_data = defaultdict(list)
-            for order in orders:
-                daily_data[order["date"]].append(order["cycle_time"])
+            # Convert daily_data to a list of objects
+            # result = [
+            #     {"day": day, "picked": counts["picked"], "packed": counts["packed"], "shipped": counts["shipped"]}
+            #     for day, counts in sorted(daily_data.items())
+            # ]
 
-            # Calculate average cycle time for each day
-            daily_avg = [
-                {"date": day, "avg_cycle_time": sum(times) / len(times)}
-                for day, times in daily_data.items()
-            ]
-
-            # Sort results by date
-            daily_avg.sort(key=lambda x: x["date"])
-
-            # Return the response
-            logger.info("Successfully calculated average cycle time per day for the past month")
-            return Response(daily_avg, status=200)
-
+            return Response(result, status=200)
         except Exception as e:
-            logger.error("Failed to calculate average cycle time per day (CycleTimePerOrderView)")
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": str(e)}, status=500)       
 
