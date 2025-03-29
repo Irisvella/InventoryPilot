@@ -36,7 +36,6 @@ class users(AbstractBaseUser, PermissionsMixin):
         max_length=10, choices=THEME_CHOICES, default='light'
     )
 
-
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     
