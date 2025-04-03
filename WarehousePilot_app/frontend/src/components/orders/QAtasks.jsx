@@ -315,7 +315,8 @@ const QATasks = () => {
                     </TableHeader>
                     <TableBody>
                       {paginatedRows.map((item) => (
-                        <TableRow key={item.id} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <TableRow key={item.id} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+                        even:bg-gray-100 odd:bg-white dark:even:bg-gray-700 dark:odd:bg-gray-800">
                           <TableCell className="dark:text-white">{item.manufacturing_task_id}</TableCell>
                           <TableCell className="dark:text-white">{item.qty}</TableCell>
                           <TableCell className="dark:text-white">{item.sku_color}</TableCell>

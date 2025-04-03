@@ -521,7 +521,8 @@ export default function ManuTasksTable() {
           </TableHeader>
           <TableBody emptyContent={"No items found"} items={paginatedItems}>
             {(item) => (
-              <TableRow key={item.manufacturing_task_id}>
+              <TableRow key={item.manufacturing_task_id}
+              className="even:bg-gray-100 odd:bg-white dark:even:bg-gray-700 dark:odd:bg-gray-800">
                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
               </TableRow>
             )}

@@ -631,7 +631,8 @@ const OrderListView = () => {
 
                   <TableBody items={paginatedRows}>
                     {(item) => (
-                      <TableRow key={item.id}>
+                      <TableRow key={item.id}
+                      className="odd:bg-white even:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-700">
                         {visibleTableColumns.map((column) => (
                           <TableCell key={`${item.id}-${column.uid}`}>
                             {renderCell(item, column.uid)}
