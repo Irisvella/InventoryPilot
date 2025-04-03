@@ -559,7 +559,8 @@ export default function InventoryTable() {
           </TableHeader>
           <TableBody emptyContent={"No items found"} items={paginatedItems}>
             {(item) => (
-              <TableRow key={item.inventory_id}>
+              <TableRow key={item.inventory_id}
+              className="odd:bg-white even:bg-blue-100 dark:odd:bg-gray-800 dark:even:bg-gray-700">
                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
               </TableRow>
             )}
