@@ -11,44 +11,138 @@ import {
   Button,
   Modal,
   ModalContent,
-  ModalBody,
-  Tab,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@heroui/react";
 import { SearchIcon } from "@heroui/shared-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import SideBar from "../dashboard_sidebar1/App";
 import NavBar from "../navbar/App";
 import axios from "axios";
-
+import { Icon } from "@iconify/react";
+import { Spinner } from "@heroui/spinner";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Define columns for the inventory table
+const inventoryColumns = [
+  {
+    uid: "picklist_item_id",
+    name: "Picklist Item ID",
+    sortable: true,
+  },
+  {
+    uid: "location",
+    name: "Location",
+    sortable: false,
+  },
+  {
+    uid: "sku_color",
+    name: "SKU",
+    sortable: false,
+  },
+  {
+    uid: "area",
+    name: "Area",
+    sortable: true,
+  },
+  {
+    uid: "lineup_nb",
+    name: "Lineup #",
+    sortable: false,
+  },
+  {
+    uid: "model_nb",
+    name: "Model Type",
+    sortable: false,
+  },
+  {
+    uid: "material_type",
+    name: "Type",
+    sortable: true,
+  },
+  {
+    uid: "quantity",
+    name: "Required Quantity",
+    sortable: true,
+  },
+  {
+    uid: "picked_quantity",
+    name: "Picked Quantity",
+    sortable: false,
+  },
+  {
+    uid: "status",
+    name: "Status",
+    sortable: false,
+  },
+  {
+    uid: "picked_at",
+    name: "Picked At",
+    sortable: false,
+  },
+  {
+    uid: "action",
+    name: "Action",
+    sortable: false,
+  },
+  {
+    uid: "label",
+    name: "Label",
+    sortable: false,
+  },
+];
 
-
+// Function to get default visible columns
+const getVisibleColumns = () => {
+  return [
+    "picklist_item_id",
+    "location",
+    "sku_color",
+    "area",
+    "lineup_nb",
+    "model_nb",
+    "material_type",
+    "quantity",
+    "picked_quantity",
+    "status",
+    "picked_at",
+    "action",
+    "label",
+  ];
+};
 
 const InventoryPicklistItem = () => {
   const { order_id } = useParams();
   const [inventoryItems, setInventoryItems] = useState([]);
   const [manufacturingItems, setManufacturingItems] = useState([]);
-  const [pickedQuantities, setPickedQuantities] = useState({});// changed 
-
+  const [pickedQuantities, setPickedQuantities] = useState({});
+  const [isHovered, setIsHovered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterValue, setFilterValue] = useState("");
   const [page, setPage] = useState(1);
   const [inventoryPage, setInventoryPage] = useState(1);
-
-  const [items, setItems] = useState([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [typeFilter, setTypeFilter] = useState("All");
 
+  // Added for column visibility and sorting features
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "area",
+    direction: "ascending",
+  });
+  const [visibleColumns, setVisibleColumns] = useState(new Set(getVisibleColumns()));
+  
   const navigate = useNavigate();
   const rowsPerPage = 8;
 
   const user = localStorage.getItem("user");
   const parsedUser = user ? JSON.parse(user) : null;
   const userRole = parsedUser ? parsedUser.role : null;
-  // pick item modal
+  
   const [pickModalOpen, setPickModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -131,7 +225,7 @@ const InventoryPicklistItem = () => {
     handleManualPickConfirm(); // Proceed with the existing manual pick confirmation logic
   };
 
-  // Fetch both inventory and manufacturing items for the given order
+  // Fetch order items function
   const fetchOrderItems = async (order_id) => {
     try {
       const token = localStorage.getItem("token");
@@ -164,7 +258,15 @@ const InventoryPicklistItem = () => {
           }),
       ]);
 
-      setInventoryItems(inventoryResponse.data);
+      console.log("Inventory items data:", inventoryResponse.data);
+      
+      // Add order_id to each inventory item for sorting and filtering
+      const inventoryItemsWithOrderId = inventoryResponse.data.map(item => ({
+        ...item,
+        order_id: order_id
+      }));
+      
+      setInventoryItems(inventoryItemsWithOrderId);
       setManufacturingItems(manufacturingResponse.data);
       setLoading(false);
     } catch (err) {
@@ -173,12 +275,11 @@ const InventoryPicklistItem = () => {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchOrderItems(order_id);
   }, [order_id]);
 
-  // Filter rows by search text
   // Filter rows for inventory items based on search text
   const filteredInventoryItems = useMemo(() => {
     if (!filterValue.trim()) return inventoryItems;
@@ -191,11 +292,49 @@ const InventoryPicklistItem = () => {
         item.area?.toLowerCase().includes(searchTerm) ||
         item.lineup_nb?.toLowerCase().includes(searchTerm) ||
         item.model_nb?.toLowerCase().includes(searchTerm) ||
-        item.material_type?.toLowerCase().includes(searchTerm)
+        item.material_type?.toLowerCase().includes(searchTerm) ||
+        (item.department && item.department.toLowerCase().includes(searchTerm))
     );
   }, [inventoryItems, filterValue]);
 
-  // Filter rows for manufacturing items based on search text
+  // Sort inventory items
+  const sortedInventoryItems = useMemo(() => {
+    if (!filteredInventoryItems.length) return [];
+    
+    const itemsCopy = [...filteredInventoryItems];
+    
+    itemsCopy.sort((a, b) => {
+      // First sort by the selected column and direction
+      const col = sortDescriptor.column;
+      const dir = sortDescriptor.direction === "ascending" ? 1 : -1;
+      
+      // Special case for material_type - always sort Metal before Plastic regardless of direction
+      if (col === "material_type") {
+        if (a.material_type === "Metal" && b.material_type === "Plastic") return -1 * dir;
+        if (a.material_type === "Plastic" && b.material_type === "Metal") return 1 * dir;
+        
+        // If both are the same type or neither is Metal/Plastic, use regular string comparison
+        const valA = (a[col] || "").toString().toLowerCase();
+        const valB = (b[col] || "").toString().toLowerCase();
+        return valA.localeCompare(valB) * dir;
+      }
+      
+      // Handle different column types for other columns
+      if (col === "picklist_item_id" || col === "quantity") {
+        const valA = parseInt(a[col]) || 0;
+        const valB = parseInt(b[col]) || 0;
+        return (valA - valB) * dir;
+      } else {
+        const valA = (a[col] || "").toString().toLowerCase();
+        const valB = (b[col] || "").toString().toLowerCase();
+        return valA.localeCompare(valB) * dir;
+      }
+    });
+    
+    return itemsCopy;
+  }, [filteredInventoryItems, sortDescriptor]);
+
+  // Filter rows for manufacturing items
   const filteredManufacturingItems = useMemo(() => {
     if (!filterValue.trim()) return manufacturingItems;
     const searchTerm = filterValue.toLowerCase();
@@ -210,14 +349,37 @@ const InventoryPicklistItem = () => {
     );
   }, [manufacturingItems, filterValue]);
 
-  
+  // Apply pagination for inventory items
+  const paginatedInventoryItems = useMemo(() => {
+    const start = (inventoryPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return sortedInventoryItems.slice(start, end);
+  }, [inventoryPage, sortedInventoryItems]);
 
-  const totalInventoryPages = Math.ceil(
-    filteredInventoryItems.length / rowsPerPage
+  // Apply pagination for manufacturing items
+  const paginatedManufacturingItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return filteredManufacturingItems.slice(start, end);
+  }, [page, filteredManufacturingItems]);
+
+  // Calculate total pages
+  const totalInventoryPages = Math.max(
+    1,
+    Math.ceil(sortedInventoryItems.length / rowsPerPage)
   );
-  const totalManufacturingPages = Math.ceil(
-    filteredManufacturingItems.length / rowsPerPage
+  const totalManufacturingPages = Math.max(
+    1,
+    Math.ceil(filteredManufacturingItems.length / rowsPerPage)
   );
+  
+  // Get the filtered columns based on visibility selection
+  const visibleTableColumns = useMemo(() => {
+    return inventoryColumns.filter(column => 
+      visibleColumns.has(column.uid)
+    );
+  }, [visibleColumns]);
+  
   const handlePickedQuantityChange = (picklistItemId, value) => {
     const newQuantity = parseInt(value, 10) || 0;
     setPickedQuantities((prev) => ({
@@ -250,25 +412,28 @@ const InventoryPicklistItem = () => {
         setError("No authorization token found");
         return;
       }
-  
-      const pickedQuantity = parseInt(pickQuantity, 10);
-      const requiredQuantity = selectedItem.quantity;
-  
-      if (pickedQuantity < requiredQuantity) {
-        setPickQuantityError(
-          `There are missing picks. Required: ${requiredQuantity}, Picked: ${pickedQuantity}.`
-        );
-        return;
-      } else if (pickedQuantity > requiredQuantity) {
-        setPickQuantityError(
-          `⚠ Overpicked! Required: ${requiredQuantity}, Picked: ${pickedQuantity}.`
-        );
-        return;
-      }
-  
-      setPickQuantityError(null);
-  
-      const response = await axios.patch(
+    
+    const pickedQuantity = pickedQuantities[selectedItem.picklist_item_id] || 0; 
+    const requiredQuantity = selectedItem.quantity; 
+
+    closePickModal();
+    if (pickedQuantity < requiredQuantity) {
+      setPickedQuantities((prev) => ({
+        ...prev,
+        [selectedItem.picklist_item_id]: "", 
+      }));
+      alert(`There are missing picks. Please make sure you pick the required quantity.`);
+      return; 
+
+    } else if (pickedQuantity > requiredQuantity) {
+      setPickedQuantities((prev) => ({
+        ...prev,
+        [selectedItem.picklist_item_id]: "", 
+      }));
+      alert(`⚠ Overpicked! Required: ${requiredQuantity}, Picked: ${pickedQuantity}`);
+      return; 
+    }
+      await axios.patch(
         `${API_BASE_URL}/inventory/inventory_picklist_items/${selectedItem.picklist_item_id}/pick/`,
         { picked_quantity: pickedQuantity },
         {
@@ -278,8 +443,6 @@ const InventoryPicklistItem = () => {
           },
         }
       );
-  
-    
       setInventoryItems((prev) =>
         prev.map((item) =>
           item.picklist_item_id === selectedItem.picklist_item_id
@@ -296,175 +459,122 @@ const InventoryPicklistItem = () => {
       closePickModal();
     } catch (err) {
       console.error("Error picking item:", err.response?.data || err.message);
-      setError("Failed to confirm pick. Please try again.");
-    }
-  };
-
-  const handleSkuScan = () => {
-    if (scannedSku.trim() === selectedItem.sku_color) {
-      setSkuError(null);
-      handleConfirmPick();
-    } else {
-      setSkuError("Scanned SKU does not match the requested item. Please try again.");
-    }
-  };
-
-  const [pickQuantity, setPickQuantity] = useState(""); 
-  const [pickQuantityError, setPickQuantityError] = useState(null); 
-
-  const handlePickQuantityAndSkuConfirm = () => {
-    const requiredQuantity = selectedItem.quantity;
-  
-    if (parseInt(pickQuantity, 10) !== requiredQuantity) {
-      setPickQuantityError(
-        `The picked quantity must match the required quantity of ${requiredQuantity}.`
-      );
-      return;
+      setError("Not allowed, you need to login as a staff");
     }
   
-    if (scannedSku.trim() !== selectedItem.sku_color) {
-      setSkuError("Scanned SKU does not match the requested item. Please try again.");
-      return;
-    }
-  
-    setPickQuantityError(null);
-    setSkuError(null);
-    handleConfirmPick(); 
   };
-
-  // Apply pagination for inventory items
-  const paginatedInventoryItems = useMemo(() => {
-    const start = (inventoryPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return filteredInventoryItems.slice(start, end);
-  }, [inventoryPage, filteredInventoryItems]);
-
-  // Apply pagination for manufacturing items
-  const paginatedManufacturingItems = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return filteredManufacturingItems.slice(start, end);
-  }, [page, filteredManufacturingItems]);
 
   const handleLabelClick = (picklistItemId) => {
     navigate(`/label/${picklistItemId}`);
   };
 
-  const [repickModalOpen, setRepickModalOpen] = useState(false); 
-  const [repickReason, setRepickReason] = useState(""); 
-  const [repickQuantity, setRepickQuantity] = useState(""); 
-
-  const openRepickModal = (item) => {
-    setSelectedItem(item);
-    setRepickModalOpen(true);
-  };
-
-  const closeRepickModal = () => {
-    setRepickReason("");
-    setRepickQuantity("");
-    setSelectedItem(null);
-    setRepickModalOpen(false);
-  };
-
-  const handleRepickConfirm = async () => {
-    if (!repickReason || !repickQuantity) {
-      alert("Please select a reason and input a quantity.");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("No authorization token found");
-        return;
-      }
-
-      const response = await axios.patch(
-        `${API_BASE_URL}/inventory/inventory_picklist_items/${selectedItem.picklist_item_id}/repick/`,
-        { reason: repickReason, quantity: repickQuantity },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-  
-      setInventoryItems((prev) =>
-        prev.map((item) =>
-          item.picklist_item_id === selectedItem.picklist_item_id
-            ? {
-                ...item,
-                actual_picked_quantity:
-                  item.actual_picked_quantity + parseInt(repickQuantity, 10),
-                repick: true,
-                repick_reason: repickReason,
-              }
-            : item
-        )
-      );
-
-      closeRepickModal();
-    } catch (err) {
-      console.error("Error confirming repick:", err.response?.data || err.message);
-      setError("Failed to confirm repick.");
-    }
-  };
 
   return (
     <div className="flex h-full">
       <SideBar isOpen={isSidebarOpen} />
-       
            
-        <div className="flex-1" style={{ width: "-webkit-fill-available" }}>
+        <div className="flex-1 sm:ml-10 sm:mt-2">
           <NavBar />
 
-      <div className="flex-1" style={{ width: "auto" }}>
+      <div className="flex-1 sm:ml-8">
         <div className="mt-16 p-8">
           <h1 className="text-2xl font-bold mb-6">Order {order_id} Details</h1>
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                {error}
+              </div>
+            )}
 
-          <div className="mb-6 flex items-center gap-2">
-            <Input
-              size="md"
-              placeholder="Search items"
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              endContent={
-                <SearchIcon className="text-default-400" width={16} />
-              }
-              className="w-72"
-            />
+            {/* Search, Sort and Column Visibility Controls */}
+            <div className="mb-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full">
+              <Input
+                size="md"
+                placeholder="Search items"
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                endContent={<SearchIcon className="text-default-400" width={16} />}
+                className="w-full sm:w-72"
+              />
+              
+              {/* Sort Dropdown */}
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button 
+                    variant="flat" 
+                    startContent={<Icon icon="mdi:sort" width={16} />}
+                    style={{ backgroundColor: '#f3f4f6', color: '#000' }}
+                  >
+                    Sort by {sortDescriptor.column} ({sortDescriptor.direction})
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Sort options">
+                  {inventoryColumns
+                    .filter(col => col.sortable)
+                    .map(column => (
+                      <DropdownItem 
+                        key={column.uid} 
+                        onPress={() => setSortDescriptor({ 
+                          column: column.uid, 
+                          direction: sortDescriptor.column === column.uid && 
+                                   sortDescriptor.direction === "ascending" ? "descending" : "ascending" 
+                        })}
+                      >
+                        {column.name}
+                        {column.uid === "material_type" && (
+                          <span className="ml-2 text-gray-500 text-xs">
+                            (Metal always before Plastic)
+                          </span>
+                        )}
+                      </DropdownItem>
+                    ))
+                  }
+                </DropdownMenu>
+              </Dropdown>
+              
+              {/* Column Visibility Dropdown */}
+              <Dropdown closeOnSelect={false}>
+                <DropdownTrigger>
+                  <Button 
+                    variant="flat" 
+                    startContent={<Icon icon="material-symbols:view-column" width={16} />}
+                    style={{ backgroundColor: '#f3f4f6', color: '#000' }}
+                  >
+                    Columns
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu 
+                  disallowEmptySelection
+                  aria-label="Column Visibility"
+                  selectedKeys={visibleColumns}
+                  selectionMode="multiple"
+                  onSelectionChange={setVisibleColumns}
+                >
+                  {inventoryColumns.map((column) => (
+                    <DropdownItem key={column.uid}>{column.name}</DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
 
-            <Button
-              style={{
-                color: '#b91c1c',
-                padding: '8px 16px',
-                fontSize: '14px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s ease',
-              }}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              color="default"
-              variant="faded"
-              onPress={() => {
-                if (userRole === "admin" || userRole === "manager") {
+              <Button
+                style={{
+                  color: '#b91c1c',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease',
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                color="default"
+                variant="faded"
+                onPress={() => {
                   navigate("/inventory_and_manufacturing_picklist");
-                } else if (userRole === "staff") {
-                  navigate("/inventory_and_manufacturing_picklist");// Will be changed to /assigned_picklist once the table is completed
-                }
-              }}
-            >
-              Go back
-            </Button>
-          </div>
+                }}
+              >
+                Go back
+              </Button>
+            </div>
 
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -484,17 +594,14 @@ const InventoryPicklistItem = () => {
                 ) : paginatedInventoryItems.length > 0 ? (
                   <>
                     <Table  
-                     aria-label="Inventory Pick List"
-                     className="min-w-full shadow-lg"
-                     isHeaderSticky
-                     selectionMode="multiple"
-                     bottomContentPlacement="outside"
-                     classNames={{
+                      aria-label="Inventory Pick List"
+                      className="min-w-full shadow-lg"
+                      isHeaderSticky
+                      bottomContentPlacement="outside"
+                      classNames={{
                         td: "before:bg-transparent", 
                       }}
                       topContentPlacement="outside"
-                    
-                    
                     >
                       <TableHeader className="shadow-xl">
                         <TableColumn className="text-gray-800 font-bold text-base">Picklist Item ID</TableColumn>
@@ -505,7 +612,7 @@ const InventoryPicklistItem = () => {
                         <TableColumn className="text-gray-800 font-bold text-base">Model Type</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Material Type</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Area</TableColumn>
-                        <TableColumn className="text-gray-800 font-bold text-base">Actual Picked Quantity</TableColumn>
+                        <TableColumn className="text-gray-800 font-bold text-base">Picked Quantity</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Status</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Picked At</TableColumn>
                         <TableColumn className="text-gray-800 font-bold text-base">Action</TableColumn>
@@ -514,51 +621,47 @@ const InventoryPicklistItem = () => {
                       <TableBody>
                         {paginatedInventoryItems.map((item) => (
                           <TableRow key={item.picklist_item_id}>
-                            <TableCell className="text-center">{item.picklist_item_id}</TableCell>
-                            <TableCell className="text-center">
+                            <TableCell>{item.picklist_item_id}</TableCell>
+                            <TableCell>
                               <span className="bg-blue-100 text-black-800 font-semibold px-2 py-1 rounded">
                                 {item.location}
                               </span>
                             </TableCell>
 
-                            <TableCell className="text-center">
+                            <TableCell>
                               <span className="bg-blue-100 text-black-800 font-semibold px-2 py-1 rounded">
                                 {item.quantity}
                               </span>
                             </TableCell>
 
-                            <TableCell className="text-center">
+                            <TableCell>
                               <span className="bg-blue-100 text-black-800 font-semibold px-2 py-1 rounded">
                                 {item.sku_color}
                               </span>
                             </TableCell>
-                            <TableCell className="text-center">{item.lineup_nb || 'N/A'}</TableCell>
-                            <TableCell className="text-center">{item.model_nb || 'N/A'}</TableCell>
-                            <TableCell className="text-center">{item.material_type || 'N/A'}</TableCell>
-                            <TableCell className="text-center">{item.area || 'N/A'}</TableCell>
-                            <TableCell className="text-center">
-                              <span className="bg-green-100 text-black-800 font-semibold px-2 py-1 rounded">
-                                {item.actual_picked_quantity || 0} / {item.quantity}
-                              </span>
+                            <TableCell>{item.lineup_nb || 'N/A'}</TableCell>
+                            <TableCell>{item.model_nb || 'N/A'}</TableCell>
+                            <TableCell>{item.material_type || 'N/A'}</TableCell>
+                            <TableCell>{item.area || 'N/A'}</TableCell>
+                            <TableCell style={{width:"150px", paddingRight:"50px"}}>
+                              <Input
+                                type="number"
+                                min="0"
+                                size="sm"
+                                value={pickedQuantities[item.picklist_item_id] || ""}
+                                onChange={(e) =>
+                                  handlePickedQuantityChange(item.picklist_item_id, e.target.value)
+                                }
+                                disabled={item.status} 
+                                />
                             </TableCell>
-                            <TableCell className="text-center">
-                              {item.repick ? (
-                                <span className="text-orange-500 font-semibold">Repicked</span>
-                              ) : item.status ? (
-                                <>
-                                  Picked
-                                  {item.manually_picked && (
-                                    <span className="ml-2 text-red-500 font-semibold">(Manual)</span>
-                                  )}
-                                </>
-                              ) : (
-                                "To Pick"
-                              )}
+                            <TableCell>
+                              {item.status ? "Picked" : "To Pick"}
                             </TableCell>
-                            <TableCell className="text-center">
+                            <TableCell>
                               {item.picked_at ? new Date(item.picked_at).toLocaleString() : 'Not picked yet'}
                             </TableCell>
-                            <TableCell className="text-center">
+                            <TableCell>
                               {item.status ? (
                                 <span>Picked</span>
                               ) : (
@@ -572,31 +675,16 @@ const InventoryPicklistItem = () => {
                                 />
                               )}
                             </TableCell>
-                            <TableCell className="text-center">
-                              <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
-                                <Button 
-                                  style={{
-                                    backgroundColor: '#b91c1c',
-                                    color: 'white',
-                                  }}
-                                  size="sm"
-                                  onPress={() => handleLabelClick(item.picklist_item_id)}
-                                >
-                                  View Label
-                                </Button>
-                                {item.status && (
-                                  <Button
-                                    style={{
-                                      backgroundColor: "#f59e0b",
-                                      color: "white",
-                                    }}
-                                    size="sm"
-                                    onPress={() => openRepickModal(item)}
-                                  >
-                                    Repick
-                                  </Button>
-                                )}
-                              </div>
+                            <TableCell>
+                              <Button 
+                              style={{
+                               backgroundColor: '#b91c1c',
+                               color: 'white',
+                              }}
+                               size="sm"
+                                onPress={() => handleLabelClick(item.picklist_item_id)}>
+                                View Label
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -638,6 +726,12 @@ const InventoryPicklistItem = () => {
                         <p>
                           Please scan the SKU and input the quantity for the <b>{selectedItem.sku_color}</b> item to confirm.
                         </p>
+                        {/* Display department in confirmation modal */}
+                        {selectedItem.department && (
+                          <p className="mt-2">
+                            <b>Department:</b> {selectedItem.department}
+                          </p>
+                        )}
                         {selectedItem.area && (
                           <p className="mt-2">
                             <b>Area:</b> {selectedItem.area}
@@ -820,7 +914,7 @@ const InventoryPicklistItem = () => {
                 ) : paginatedManufacturingItems.length > 0 ? (
                   <>
                     <Table
-                      aria-label="Rows actions table example with dynamic content"
+                      aria-label="Manufacturing List Items"
                       removeWrapper
                       className="bg-gray-200 rounded-lg border-collapse"
                       css={{
@@ -879,7 +973,7 @@ const InventoryPicklistItem = () => {
         </div>
       </div>
     </div>
-    </div>
+  </div>
   );
 };
 

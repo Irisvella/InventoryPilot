@@ -322,12 +322,13 @@ class InventoryPicklistItemsView(APIView):
             # Fetch the inventory picklist associated with the order
             picklist = InventoryPicklist.objects.get(order_id=order)
 
-            # Fetch picklist items for the given picklist
+            # Fetch picklist items for the given picklist with related inventory data
             picklist_items = InventoryPicklistItem.objects.filter(
                 picklist_id=picklist.picklist_id
             ).order_by("location").values(
                 'picklist_item_id',
-                'location__location',
+                'location__location',  # This gives us the location.location value
+                'location__warehouse_number',  # This gives us the warehouse_number (department)
                 'sku_color__sku_color',
                 'amount',
                 'status',
@@ -348,6 +349,7 @@ class InventoryPicklistItemsView(APIView):
                 {
                     "picklist_item_id": item['picklist_item_id'],
                     "location": item['location__location'],
+                    "department": item['location__warehouse_number'],  # Now using the proper field
                     "sku_color": item['sku_color__sku_color'],
                     "quantity": item['amount'],
                     "status": item['status'],
@@ -375,9 +377,7 @@ class InventoryPicklistItemsView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         except InventoryPicklist.DoesNotExist:
-
             logger.error("Picklist could not be found for order %s (InventoryPicklistItemsView)", order_id)
-
             return Response(
                 {"error": "No picklist found for the given order"},
                 status=status.HTTP_404_NOT_FOUND
