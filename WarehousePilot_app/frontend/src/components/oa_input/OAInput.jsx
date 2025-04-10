@@ -1,3 +1,4 @@
+/* The upload button as well as the blue information icon were tested*/ 
 import React, { useState } from "react";
 import axios from "axios";
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
@@ -108,7 +109,7 @@ const OAInput = () => {
             }
             placement="right"
           >
-            <span className="text-blue-600 cursor-pointer text-lg">ℹ️</span>
+            <span className="text-blue-600 cursor-pointer text-lg">ℹ️</span> 
           </Tooltip>
         </div>
 

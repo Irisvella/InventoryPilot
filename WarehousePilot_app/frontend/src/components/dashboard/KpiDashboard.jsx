@@ -1,6 +1,6 @@
 /* "View Details" button has been tested on all cards where it's present: 
  Active Orders, Order Picking Accuracy,Throughput Threshold,Order fulfillment,Cycle Time Per Order.*/
-
+/*The date buttons: 1d, 1w, 1m, 1 year have been tested */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CycleTime from "./CycleTime";

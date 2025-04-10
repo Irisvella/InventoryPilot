@@ -1,3 +1,5 @@
+/*The dark mode button has been tested */
+
 import type { NavbarProps } from "@heroui/react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from "react";

@@ -1,3 +1,4 @@
+/* The menu has been tested to change dynamically with each user type*/
 "use client";
 
 import React, { useState, useEffect } from "react";
