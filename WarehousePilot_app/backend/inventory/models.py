@@ -46,6 +46,8 @@ class InventoryPicklistItem(models.Model):
       repick = models.BooleanField(default=False)  
       repick_reason = models.TextField(null=True, blank=True)
       actual_picked_quantity = models.IntegerField(default=0)  # New field to store the actual picked amount
+      picked_by = models.ForeignKey(users, null=True, blank=True, on_delete=models.SET_NULL, related_name="picked_items")
+      repicked_by = models.ForeignKey(users, null=True, blank=True, on_delete=models.SET_NULL, related_name="repicked_items")
 
 def __str__(self):
         return f"Picklist Item {self.picklist_item_id} - Status: {self.status}"

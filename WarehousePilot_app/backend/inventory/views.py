@@ -230,24 +230,21 @@ class PickPicklistItemView(APIView):
         try:
             item = InventoryPicklistItem.objects.get(picklist_item_id=picklist_item_id)
         except InventoryPicklistItem.DoesNotExist:
-#logger.error("Item %s was not found", picklist_item_id)
             return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
 
-# If your role check remains the same:
         if request.user.role == 'qa':
-#logger.error("Unauthorized user - only staff users can access picklist picking")
-            return Response({"error": "Not allowed. You need login as a staff "}, status=403)
+            return Response({"error": "Not allowed. You need to log in as staff."}, status=403)
 
         manually_picked = request.data.get("manually_picked", False)
         picked_quantity = request.data.get("picked_quantity", 0)
 
-       
+        # Update fields
         item.actual_picked_quantity += int(picked_quantity)
         item.status = True
         item.picked_at = timezone.now()
         item.manually_picked = manually_picked
+        item.picked_by = request.user  # Store the user who picked the item
         item.save()
-#logger.info("Item %s has been successfully picked", picklist_item_id)
 
         return Response({"message": "Item picked successfully"}, status=status.HTTP_200_OK)
 
@@ -269,9 +266,11 @@ class RepickPicklistItemView(APIView):
         if not reason or not quantity:
             return Response({"error": "Reason and quantity are required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Update fields
         item.repick = True
         item.repick_reason = reason
-        item.actual_picked_quantity += int(quantity)  
+        item.actual_picked_quantity += int(quantity)
+        item.repicked_by = request.user  # Store the user who repicked the item
         item.save()
 
         return Response({"message": f"Item marked for repick due to {reason} with quantity {quantity}."}, status=status.HTTP_200_OK)
